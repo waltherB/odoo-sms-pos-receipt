@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!--
+        Extends the existing ReceiptScreen template from point_of_sale.
+        The exact XPath expression to locate the button container might vary slightly
+        depending on Odoo 17's POS structure. Common places are within a div with class 'receipt-buttons'
+        or near the email/print buttons.
+
+        This example assumes a structure like:
+        <div class="pos-receipt-container">
+            ...
+            <div class="receipt-buttons"> (or similar, e.g., 'button-group', 'actions')
+                <!-- Existing buttons like Print, Email -->
+            </div>
+            ...
+        </div>
+
+        If the Odoo 17 ReceiptScreen structure is different, the XPath needs adjustment.
+        A common approach is to find a landmark element (like the print or email button)
+        and insert before or after it, or inside its parent container.
+
+        For Odoo 17, the ReceiptScreen is an OWL component.
+        The template is usually named `ReceiptScreen.xml` or `point_of_sale.ReceiptScreen`.
+        The `t-inherit` and `t-inherit-mode` attributes are used for modifications.
+    -->
+
+    <t t-name="pos_sms_receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
+        <!--
+            Attempt to locate a common area for action buttons on the receipt screen.
+            A typical class for button groups is 'next-content'.
+            If this XPath doesn't work, it will need to be adjusted after inspecting
+            the live Odoo 17 POS ReceiptScreen structure.
+
+            Alternative XPaths if the one below doesn't work:
+            - expr="//div[hasclass('pos-receipt-container')]//div[hasclass('actions')]"
+            - expr="//div[hasclass('receipt-screen')]//div[hasclass('button-group')]"
+            - expr="//button[contains(@class, 'receipt-print-button')]/.." (to get parent of print button)
+            - expr"//div[hasclass('buttons')]" (a generic buttons container)
+
+            The goal is to place the SMS input and button logically alongside other receipt actions.
+            Let's try to target a common buttons area, often after the receipt itself.
+        -->
+        <xpath expr="//div[hasclass('pos-receipt-container')]/div[hasclass('next-content')]" position="inside">
+            <!--
+                It might be better to place it inside a more specific button group if available,
+                or create a new row/group for SMS functionality if it feels too cluttered.
+                Using 'inside' on 'next-content' might place it alongside "New Order" button.
+                Let's refine this to be more specific to receipt actions if possible.
+
+                If there's a section specifically for "Email" or "Print" buttons, that's ideal.
+                Assuming a structure where action buttons are grouped:
+            -->
+        </xpath>
+
+        <!--
+            Let's try a more robust XPath. Often, buttons are grouped.
+            If there's an "Email" button, we can try to add our SMS section near it.
+            Example: Find the div that contains the email button, and add our elements inside it, or after it.
+            This is highly dependent on the actual template of point_of_sale.ReceiptScreen.
+
+            A common pattern is a div that groups action buttons.
+            Let's assume there's a `div` with class `send-email-button` or similar,
+            and we want to add our elements after that button's container or within the same group.
+
+            Let's try to find a general button bar or action panel.
+            The class `button-group` or `btn-group` is common.
+            The `default-highlight` class is often on the "New Order" button. We want to be before that.
+        -->
+        <xpath expr="//div[hasclass('button') and contains(@class, 'default-highlight')]" position="before">
+            <!-- This XPath targets the "New Order" button (or similar main action button) and inserts before it. -->
+            <t t-if="shouldShowSmsFeature">
+                <div class="sms-receipt-controls button-group p-2 d-flex flex-column align-items-stretch">
+                    <label for="sms_receipt_phone_input_id" class="form-label mb-1 text-muted">
+                        <small><t t-esc="env._t('SMS Receipt Phone:')"/></small>
+                    </label>
+                    <input type="tel"
+                           id="sms_receipt_phone_input_id"
+                           class="form-control form-control-sm sms_receipt_phone_input mb-2"
+                           placeholder="Enter phone number for SMS"
+                           t-model="smsPhoneNumber"
+                           aria-label="Phone number for SMS receipt"/>
+
+                    <button class="btn btn-primary btn-lg send_sms_receipt_button w-100" t-on-click="_sendSmsReceipt">
+                        <i class="fa fa-comment me-1"/> <t t-esc="env._t('Send by SMS')"/>
+                    </button>
+                </div>
+            </t>
+        </xpath>
+
+        <!--
+            Alternative XPath if the above is not suitable:
+            If there's a clearly identifiable "Email receipt" button, e.g., with t-on-click="sendEmail":
+            <xpath expr="//button[contains(@t-on-click, 'sendEmail')]" position="after">
+                <div class="sms-receipt-controls button-group p-2 d-flex flex-column align-items-stretch ms-2">
+                    ... (same content as above) ...
+                </div>
+            </xpath>
+            This would place the SMS controls immediately after the Email button.
+            The `ms-2` (margin start) is for some spacing.
+
+            Let's stick with the `position="before"` the main "New Order" button for now, as it's a common landmark.
+            The styling `d-flex flex-column align-items-stretch` and `w-100` for the button aims for a clean layout.
+            `p-2` adds some padding around the SMS controls group.
+            `form-control-sm` for a smaller input field.
+            `btn-lg` for a prominent send button.
+            `me-1` for margin end on the icon.
+            The `label` is added for accessibility and clarity.
+            `t-model="smsPhoneNumber"` provides two-way data binding with the `smsPhoneNumber` getter/setter
+            in the `ReceiptScreen.js`. The `t-on-input` is not strictly necessary if `t-model` works as expected
+            for custom getters/setters, but can be used to explicitly call a method if needed.
+            Let's simplify to just `t-model` as it's the standard OWL way for two-way binding.
+            The method `_updateSmsPhoneNumber` would be:
+            _updateSmsPhoneNumber(event) { this.smsPhoneNumber = event.target.value; }
+            but `t-model` should handle this. So, `t-on-input` can be removed if `t-model` is sufficient.
+            For clarity and explicit control, sometimes `t-on-input` is preferred with `t-att-value`.
+            Let's use `t-model` as it's more concise for OWL.
+            Removed `t-on-input="_updateSmsPhoneNumber"` as `t-model` should handle it.
+
+            Final check on classes: Bootstrap 5 classes are common in Odoo 17 (e.g., `form-label`, `form-control`, `btn`, `btn-primary`, `w-100`, `p-2`, `mb-1`, `mb-2`, `me-1`, `d-flex`, `flex-column`, `align-items-stretch`).
+            FontAwesome icons (`fa fa-comment`) are also standard.
+            The `aria-label` is for accessibility.
+            `env._t()` is used for translatable strings.
+        -->
+
+    </t>
+
+</templates>
