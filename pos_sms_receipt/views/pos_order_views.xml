@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="pos_order_view_form_sms_receipt" model="ir.ui.view">
+            <field name="name">pos.order.form.sms.receipt</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+            <field name="arch" type="xml">
+                <!-- Add fields to the form view, e.g., after partner_id or in a new group -->
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="phone_for_sms_receipt" readonly="1"/>
+                    <field name="is_sms_receipt_sent" readonly="1"/>
+                </xpath>
+
+                <!-- Optionally, add the button to resend SMS from backend -->
+                <!-- This button calls the `button_send_sms_receipt_backend` method -->
+                <xpath expr="//header" position="inside">
+                     <button name="button_send_sms_receipt_backend"
+                            string="Resend SMS Receipt"
+                            type="object"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('state', 'in', ['draft', 'cancel'])]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
