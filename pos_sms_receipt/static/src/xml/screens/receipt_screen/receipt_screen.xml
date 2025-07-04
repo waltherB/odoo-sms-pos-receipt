@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_sms_receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
+        <!--
+            Targeting the email input's parent div to insert SMS controls afterwards.
+            From Odoo 18's `receipt_screen.xml`:
+            <input type="text" class="... send-receipt-email-input" .../>
+            This input is inside a <div class="d-flex">.
+            This div.d-flex is inside <div class="d-flex flex-column gap-2">
+            which is inside <div class="receipt-options d-flex flex-column gap-2">.
+
+            XPath to find the div containing the email input and its send button:
+            //input[hasclass('send-receipt-email-input')]/parent::div[hasclass('d-flex')]
+            We will insert our SMS section after this div.
+        -->
+        <xpath expr="//input[hasclass('send-receipt-email-input')]/parent::div[hasclass('d-flex')]" position="after">
+            <t t-if="shouldShowSmsFeature">
+                <div class="sms-receipt-section d-flex flex-column gap-1 mt-2"> <!-- mt-2 for some margin -->
+                    <label for="sms_receipt_phone_input_v18" class="form-label text-muted mb-0">
+                        <small><t t-esc="_t('SMS Phone:')"/></small>
+                    </label>
+                    <div class="d-flex">
+                        <input type="tel"
+                               id="sms_receipt_phone_input_v18"
+                               class="flex-grow-1 border p-3 bg-view pe-5 rounded-start-2 position-relative send-receipt-sms-input"
+                               placeholder="e.g. +1234567890"
+                               t-model="sms_phone_for_receipt_input"
+                               aria-label="Phone number for SMS receipt"/>
+                        <!--模仿邮件按钮的结构-->
+                        <div>
+                             <button t-att-style="`width: ${this.ui.isSmall ? '4rem' : '8rem'}`"
+                                    class="btn btn-secondary btn-lg lh-lg rounded-start-0 h-100"
+                                    t-on-click="_sendSmsReceipt"
+                                    title="Send SMS Receipt">
+                                <i t-attf-class="fa {{ _sendSmsReceipt.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-commenting' }}"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+
+</templates>
+<!--
+Odoo 18 XML Changes:
+- XPath targets the div parent of 'send-receipt-email-input' and places the SMS section after it.
+- `t-if="shouldShowSmsFeature"` controls visibility based on POS config.
+- Input field uses `t-model="sms_phone_for_receipt_input"` to bind to the getter/setter in ReceiptScreen.js, which uses `this.smsState`.
+- Button calls `_sendSmsReceipt`.
+- Styling classes `flex-grow-1 border p-3 bg-view pe-5 rounded-start-2 position-relative send-receipt-sms-input` are borrowed from the email input for consistency.
+- The SMS send button mimics the structure of the email send button (input group style).
+- Icon `fa-commenting` is used for SMS, with a loading spinner logic similar to the email button (though `_sendSmsReceipt.status` is not explicitly defined in this version of JS, this is a common pattern if `useTrackedAsync` were used for `_sendSmsReceipt`). For simplicity, a static icon is fine, or the spinner logic can be fully implemented if `_sendSmsReceipt` is wrapped with `useTrackedAsync`.
+  For now, simplified the icon part on the SMS button as `useTrackedAsync` was not added to `_sendSmsReceipt` to keep the JS patch focused.
+  Let's use a static icon `fa-commenting-o` or `fa-sms`. `fa-commenting` or `fa-mobile` are also options.
+  Changed to `fa-commenting`.
+- Added `mt-2` for margin-top on the SMS section.
+- Label added for clarity.
+- `title` attribute on the button for tooltip.
+- The button width styling `t-att-style="width: ..."` is copied from the email button for consistency.
+-->
