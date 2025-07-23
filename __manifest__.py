@@ -34,18 +34,10 @@ Key Features:
     ],
     'assets': {
         'point_of_sale.assets': [
+            'pos_sms_receipt/static/src/js/test_component.js',
             'pos_sms_receipt/static/src/js/models.js',
             'pos_sms_receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js',
             'pos_sms_receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml',
-            'pos_sms_receipt/static/src/js/test_component.js',
-            'pos_sms_receipt/static/src/xml/test_component.xml',
-        ],
-        'web.assets_backend': [
-            'pos_sms_receipt/static/src/js/models.js',
-            'pos_sms_receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js',
-            'pos_sms_receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml',
-            'pos_sms_receipt/static/src/js/test_component.js',
-            'pos_sms_receipt/static/src/xml/test_component.xml',
         ],
     },
     'installable': True,
