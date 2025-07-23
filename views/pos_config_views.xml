@@ -11,7 +11,7 @@
                     <group string="SMS Receipts" name="sms_receipts_group">
                         <field name="enable_sms_receipt"/>
                         <field name="sms_gateway_id" 
-                               attrs="{'invisible': [('enable_sms_receipt', '=', False)]}"
+                               invisible="not enable_sms_receipt"
                                placeholder="Default SMS Gateway"/>
                     </group>
                 </xpath>

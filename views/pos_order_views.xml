@@ -13,7 +13,7 @@
                         <field name="is_sms_receipt_sent" readonly="1" 
                                widget="boolean_toggle"/>
                         <field name="sms_receipt_error" readonly="1" 
-                               attrs="{'invisible': [('sms_receipt_error', '=', False)]}"/>
+                               invisible="not sms_receipt_error"/>
                     </group>
                 </xpath>
 
@@ -23,7 +23,7 @@
                             string="Send SMS Receipt"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [('state', 'in', ['draft', 'cancel'])]}"/>
+                            invisible="state in ['draft', 'cancel']"/>
                 </xpath>
             </field>
         </record>
