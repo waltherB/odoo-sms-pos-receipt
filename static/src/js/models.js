@@ -3,6 +3,8 @@
 import { Order } from "@point_of_sale/app/store/models";
 import { patch } from "@web/core/utils/patch";
 
+console.log("🚀 POS SMS Receipt - models.js loaded!");
+
 // Patch Order to add the phone number field
 patch(Order.prototype, {
     setup(_options) {

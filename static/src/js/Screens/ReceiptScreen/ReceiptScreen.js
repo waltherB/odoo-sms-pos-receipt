@@ -5,6 +5,8 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
 
+console.log("🚀 POS SMS Receipt - ReceiptScreen.js loaded!");
+
 patch(ReceiptScreen.prototype, {
     setup() {
         super.setup(...arguments);
