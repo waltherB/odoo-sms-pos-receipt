@@ -7,7 +7,7 @@
             <field name="res_model">sms.template</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('model_id.model', '=', 'pos.order')]</field>
-            <field name="context">{'default_model_id': ref('point_of_sale.model_pos_order')}</field>
+            <field name="context">{'default_model': 'pos.order'}</field>
         </record>
 
         <menuitem id="menu_pos_sms_template"
