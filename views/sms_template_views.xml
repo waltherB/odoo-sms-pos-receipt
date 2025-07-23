@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- SMS Template Form View for POS Receipt -->
-        <record id="sms_template_pos_receipt_form" model="ir.ui.view">
-            <field name="name">sms.template.pos.receipt.form</field>
-            <field name="model">sms.template</field>
-            <field name="inherit_id" ref="sms.sms_template_view_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='body']" position="attributes">
-                    <attribute name="placeholder">Example POS Receipt SMS Template:
-
-Receipt for Order: ${object.name}
-Date: ${object.date_order.strftime('%Y-%m-%d %H:%M')}
-${object.partner_id.name and 'Customer: ' + object.partner_id.name or ''}
-
-Items:
-% for line in object.lines:
-- ${line.product_id.name} x${line.qty} = ${line.price_subtotal_incl} ${object.currency_id.symbol}
-% endfor
-
-Total: ${object.amount_total} ${object.currency_id.symbol}
-Thank you for your purchase!</attribute>
-                </xpath>
-            </field>
-        </record>
-
         <!-- Menu item for SMS Template configuration -->
         <record id="action_sms_template_pos_receipt" model="ir.actions.act_window">
             <field name="name">POS SMS Receipt Template</field>
@@ -32,6 +8,7 @@ Thank you for your purchase!</attribute>
             <field name="view_mode">form</field>
             <field name="res_id" ref="pos_sms_receipt.sms_template_pos_receipt"/>
             <field name="target">current</field>
+            <field name="context">{'default_model_id': ref('point_of_sale.model_pos_order')}</field>
         </record>
 
         <menuitem id="menu_pos_sms_template"
