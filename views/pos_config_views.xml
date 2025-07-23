@@ -6,24 +6,24 @@
             <field name="model">pos.config</field>
             <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@id='receipt_header_footer']" position="after">
-                    <div class="col-12 col-lg-6 o_setting_box" id="sms_receipt_settings">
-                        <div class="o_setting_left_pane">
-                            <field name="enable_sms_receipt"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="enable_sms_receipt" string="SMS Receipts"/>
-                            <div class="text-muted">
-                                Allow sending receipts via SMS from the receipt screen.
-                            </div>
-                            <div class="content-group mt16" attrs="{'invisible': [('enable_sms_receipt', '=', False)]}">
-                                <div class="row">
-                                    <label for="sms_gateway_id" class="col-lg-3 o_light_label"/>
-                                    <field name="sms_gateway_id" placeholder="Default SMS Gateway"/>
+                <!-- Add fields to a new page in the notebook -->
+                <xpath expr="//notebook" position="inside">
+                    <page string="SMS Receipts" name="sms_receipts">
+                        <div class="row mt16">
+                            <div class="col-12">
+                                <group>
+                                    <field name="enable_sms_receipt"/>
+                                    <field name="sms_gateway_id" 
+                                           attrs="{'invisible': [('enable_sms_receipt', '=', False)]}"
+                                           placeholder="Default SMS Gateway"/>
+                                </group>
+                                <div class="text-muted mt8" attrs="{'invisible': [('enable_sms_receipt', '=', False)]}">
+                                    <p>Allow sending receipts via SMS from the receipt screen.</p>
+                                    <p>If no SMS gateway is selected, the default gateway will be used.</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </page>
                 </xpath>
             </field>
         </record>
