@@ -3,16 +3,15 @@
     <data>
         <!-- Menu item for SMS Template configuration -->
         <record id="action_sms_template_pos_receipt" model="ir.actions.act_window">
-            <field name="name">POS SMS Receipt Template</field>
+            <field name="name">POS SMS Receipt Templates</field>
             <field name="res_model">sms.template</field>
-            <field name="view_mode">form</field>
-            <field name="res_id" ref="pos_sms_receipt.sms_template_pos_receipt"/>
-            <field name="target">current</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('model_id.model', '=', 'pos.order')]</field>
             <field name="context">{'default_model_id': ref('point_of_sale.model_pos_order')}</field>
         </record>
 
         <menuitem id="menu_pos_sms_template"
-                  name="SMS Receipt Template"
+                  name="SMS Receipt Templates"
                   parent="point_of_sale.menu_point_config_product"
                   action="action_sms_template_pos_receipt"
                   sequence="50"/>
