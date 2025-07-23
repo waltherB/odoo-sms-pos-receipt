@@ -14,7 +14,13 @@
                         <div class="o_setting_right_pane">
                             <label for="enable_sms_receipt" string="SMS Receipts"/>
                             <div class="text-muted">
-                                Allow sending receipts via SMS from the payment screen.
+                                Allow sending receipts via SMS from the receipt screen.
+                            </div>
+                            <div class="content-group mt16" attrs="{'invisible': [('enable_sms_receipt', '=', False)]}">
+                                <div class="row">
+                                    <label for="sms_gateway_id" class="col-lg-3 o_light_label"/>
+                                    <field name="sms_gateway_id" placeholder="Default SMS Gateway"/>
+                                </div>
                             </div>
                         </div>
                     </div>

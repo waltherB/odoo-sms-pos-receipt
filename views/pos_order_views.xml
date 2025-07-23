@@ -6,20 +6,35 @@
             <field name="model">pos.order</field>
             <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
             <field name="arch" type="xml">
-                <!-- Add fields to the form view, e.g., after partner_id or in a new group -->
-                <xpath expr="//field[@name='partner_id']" position="after">
+                <!-- Add SMS fields after email receipt field -->
+                <xpath expr="//field[@name='to_invoice']" position="after">
                     <field name="phone_for_sms_receipt" readonly="1"/>
-                    <field name="is_sms_receipt_sent" readonly="1"/>
+                    <field name="is_sms_receipt_sent" readonly="1" 
+                           widget="boolean_toggle"/>
+                    <field name="sms_receipt_error" readonly="1" 
+                           attrs="{'invisible': [('sms_receipt_error', '=', False)]}"/>
                 </xpath>
 
-                <!-- Optionally, add the button to resend SMS from backend -->
-                <!-- This button calls the `button_send_sms_receipt_backend` method -->
+                <!-- Add SMS receipt button in header -->
                 <xpath expr="//header" position="inside">
                      <button name="button_send_sms_receipt_backend"
-                            string="Resend SMS Receipt"
+                            string="Send SMS Receipt"
                             type="object"
-                            class="oe_highlight"
+                            class="btn-primary"
                             attrs="{'invisible': [('state', 'in', ['draft', 'cancel'])]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Add SMS fields to tree view -->
+        <record id="pos_order_view_tree_sms_receipt" model="ir.ui.view">
+            <field name="name">pos.order.tree.sms.receipt</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+                    <field name="is_sms_receipt_sent" widget="boolean_toggle" 
+                           string="SMS Sent"/>
                 </xpath>
             </field>
         </record>
