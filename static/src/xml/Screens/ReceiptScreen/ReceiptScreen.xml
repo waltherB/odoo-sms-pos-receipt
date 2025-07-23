@@ -2,30 +2,28 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="pos_sms_receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
-        <!-- Add SMS controls after the "New Order" button -->
-        <xpath expr="//button[contains(@class, 'next-button')]" position="after">
-            <t t-if="shouldShowSmsFeature">
-                <div class="sms-receipt-section d-flex flex-column gap-2 p-3 border rounded mt-3 bg-light">
-                    <h6 class="mb-2 text-primary">
-                        <i class="fa fa-comment me-2"/>
-                        Send Receipt by SMS
-                    </h6>
+        <!-- Add SMS controls - try multiple locations -->
+        <xpath expr="//div" position="after">
+            <div class="sms-receipt-section d-flex flex-column gap-2 p-3 border rounded mt-3 bg-warning">
+                <h5 class="mb-2 text-dark">
+                    <i class="fa fa-comment me-2"/>
+                    SMS Receipt Test - This should be visible!
+                </h5>
+                
+                <div class="d-flex flex-column gap-2">
+                    <input type="tel"
+                           class="form-control"
+                           placeholder="Enter phone number"
+                           t-model="smsPhoneNumber"
+                           aria-label="Phone number for SMS receipt"/>
                     
-                    <div class="d-flex flex-column gap-2">
-                        <input type="tel"
-                               class="form-control"
-                               placeholder="Enter phone number"
-                               t-model="smsPhoneNumber"
-                               aria-label="Phone number for SMS receipt"/>
-                        
-                        <button class="btn btn-primary w-100" 
-                                t-on-click="sendSmsReceipt">
-                            <i class="fa fa-paper-plane me-2"/>
-                            Send SMS Receipt
-                        </button>
-                    </div>
+                    <button class="btn btn-success w-100" 
+                            t-on-click="sendSmsReceipt">
+                        <i class="fa fa-paper-plane me-2"/>
+                        Send SMS Receipt
+                    </button>
                 </div>
-            </t>
+            </div>
         </xpath>
     </t>
 

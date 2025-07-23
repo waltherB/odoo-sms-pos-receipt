@@ -98,6 +98,13 @@ patch(ReceiptScreen.prototype, {
     },
 
     get shouldShowSmsFeature() {
-        return this.pos?.config?.enable_sms_receipt;
+        // Always show for testing - remove this later
+        console.log('SMS Feature Check:', {
+            pos: !!this.pos,
+            config: !!this.pos?.config,
+            enable_sms_receipt: this.pos?.config?.enable_sms_receipt
+        });
+        return true; // Force show for debugging
+        // return this.pos?.config?.enable_sms_receipt;
     }
 });
