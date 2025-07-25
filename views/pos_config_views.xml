@@ -12,7 +12,8 @@
                         <field name="enable_sms_receipt"/>
                         <field name="sms_gateway_id" 
                                invisible="not enable_sms_receipt"
-                               placeholder="Default SMS Gateway"/>
+                               placeholder="Default SMS Gateway"
+                               options="{'no_create': True, 'no_create_edit': True}"/>
                     </group>
                 </xpath>
             </field>

@@ -43,6 +43,19 @@ class PosOrder(models.Model):
         """RPC method called from POS frontend to send SMS receipt."""
         return self.action_send_sms_receipt(phone_number)
 
+    @api.model
+    def create_from_ui_with_sms(self, orders, phone_number=None):
+        """Create order from UI data and prepare for SMS sending."""
+        # Ensure phone number is included in order data
+        if phone_number and orders:
+            for order_data in orders:
+                if isinstance(order_data, dict):
+                    order_data['phone_for_sms_receipt'] = phone_number
+        
+        # Use the standard create_from_ui method
+        result = self.create_from_ui(orders)
+        return result
+
     def action_send_sms_receipt(self, phone_number=None):
         """Send SMS receipt for the order."""
         self.ensure_one()
@@ -172,17 +185,55 @@ class PosOrder(models.Model):
 
     def _send_sms_message(self, phone, body):
         """Send SMS message using configured gateway."""
-        # Get SMS gateway from POS config
-        gateway = self.config_id.sms_gateway_id
-
-        if gateway:
-            # Use specific gateway
-            self.env['sms.api'].with_context(
-                iap_account=gateway
-            )._send_sms([phone], body)
-        else:
-            # Use default gateway
-            self.env['sms.api']._send_sms([phone], body)
+        try:
+            # Get SMS gateway from POS config
+            gateway = self.config_id.sms_gateway_id
+            
+            # Create SMS record
+            sms_vals = {
+                'number': phone,
+                'body': body,
+                'state': 'outgoing',
+            }
+            
+            sms_record = self.env['sms.sms'].create(sms_vals)
+            
+            # If a specific gateway is configured for this POS, we need to 
+            # temporarily override the default SMS account selection
+            if gateway and gateway.service_name == 'sms':
+                # Monkey patch the _get_sms_account method temporarily
+                original_method = self.env['iap.account']._get_sms_account
+                
+                def custom_get_sms_account():
+                    return gateway
+                
+                # Temporarily replace the method
+                self.env['iap.account']._get_sms_account = custom_get_sms_account
+                
+                try:
+                    # Send the SMS with the custom gateway
+                    sms_record._send()
+                finally:
+                    # Restore the original method
+                    self.env['iap.account']._get_sms_account = original_method
+            else:
+                # Use default gateway
+                sms_record._send()
+            
+            # Check if sending was successful
+            if sms_record.state == 'error':
+                error_msg = sms_record.sms_api_error or sms_record.failure_type or 'Unknown SMS error'
+                raise Exception(f"SMS sending failed: {error_msg}")
+            elif sms_record.state not in ['sent', 'outgoing']:
+                # Sometimes the state might be something else, log it for debugging
+                _logger.warning(
+                    "SMS state after sending: %s for order %s", 
+                    sms_record.state, self.name
+                )
+                
+        except Exception as e:
+            _logger.error("Failed to send SMS for order %s: %s", self.name, str(e))
+            raise
 
     def button_send_sms_receipt_backend(self):
         """Backend button to send/resend SMS receipt."""

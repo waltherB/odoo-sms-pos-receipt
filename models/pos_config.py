@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class PosConfig(models.Model):
@@ -14,9 +14,10 @@ class PosConfig(models.Model):
 
     sms_gateway_id = fields.Many2one(
         'iap.account',
-        string="SMS Gateway",
+        string="SMS Gateway Account",
         domain=[('service_name', '=', 'sms')],
-        help="Select the SMS gateway to use for sending receipts. "
+        help="Select the SMS gateway account to use for sending receipts. "
+             "Choose from configured SMS gateway accounts by name. "
              "If not set, the default SMS gateway will be used."
     )
 
@@ -28,3 +29,8 @@ class PosConfig(models.Model):
         fields = super()._get_fields_for_pos_config()
         fields.extend(['enable_sms_receipt', 'sms_gateway_id'])
         return fields
+
+    @api.model
+    def setup_sms_account_names(self):
+        """Set up proper names for SMS accounts to show in dropdown."""
+        return self.env['iap.account'].setup_default_sms_account_names()

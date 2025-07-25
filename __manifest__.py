@@ -25,26 +25,27 @@ Key Features:
         'sms',
         'iap',
     ],
+    'external_dependencies': {
+        'python': [],
+    },
+    'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
         'data/sms_template_data.xml',
+        'data/setup_sms_accounts.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
         'views/sms_template_views.xml',
     ],
     'assets': {
-        'web.assets_frontend': [
-            'pos_sms_receipt/static/src/js/simple_sms.js',
-        ],
-        'web.assets_backend': [
-            'pos_sms_receipt/static/src/js/simple_sms.js',
-        ],
-        'point_of_sale.assets': [
-            'pos_sms_receipt/static/src/js/simple_sms.js',
+        'point_of_sale._assets_pos': [
+            'odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js',
+            'odoo-sms-pos-receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml',
         ],
     },
     'installable': True,
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }

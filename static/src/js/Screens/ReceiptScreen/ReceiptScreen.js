@@ -3,7 +3,7 @@
 import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { ErrorPopup } from "@point_of_sale/app/errors/popups/error_popup";
+import { _t } from "@web/core/l10n/translation";
 
 console.log("🚀 POS SMS Receipt - ReceiptScreen.js loaded!");
 
@@ -13,78 +13,128 @@ patch(ReceiptScreen.prototype, {
         this.notification = useService("notification");
         this.popup = useService("popup");
         this.orm = useService("orm");
-    },
-
-    get currentOrder() {
-        return this.pos.get_order();
+        
+        // Initialize SMS phone number and states in orderUiState like email
+        // Note: this.currentOrder is already available from the parent class
+        const partner = this.currentOrder.get_partner();
+        this.orderUiState.inputSmsPhone = this.orderUiState.inputSmsPhone || 
+            (partner && (partner.mobile || partner.phone)) || "";
+        
+        // Initialize SMS states
+        this.orderUiState.isSmsSending = false;
+        this.orderUiState.smsSuccessful = null;
+        this.orderUiState.smsNotice = "";
     },
 
     get smsPhoneNumber() {
-        return this.currentOrder?.get_phone_for_sms_receipt() || "";
+        return this.orderUiState.inputSmsPhone || "";
     },
 
     set smsPhoneNumber(value) {
-        this.currentOrder?.set_phone_for_sms_receipt(value);
+        this.orderUiState.inputSmsPhone = value;
     },
 
     async sendSmsReceipt() {
         const order = this.currentOrder;
-        const phone = this.smsPhoneNumber;
+        const phone = this.orderUiState.inputSmsPhone;
+
+        // Reset previous states
+        this.orderUiState.smsSuccessful = null;
+        this.orderUiState.smsNotice = "";
 
         if (!order) {
-            this.popup.add(ErrorPopup, {
-                title: this.env._t("Order Not Found"),
-                body: this.env._t("Cannot send SMS receipt, current order not available."),
-            });
+            this.orderUiState.smsSuccessful = false;
+            this.orderUiState.smsNotice = _t("Cannot send SMS receipt, current order not available.");
             return;
         }
 
         if (!phone || !phone.trim()) {
-            this.popup.add(ErrorPopup, {
-                title: this.env._t("Missing Phone Number"),
-                body: this.env._t("Please enter a valid phone number to send the SMS receipt."),
-            });
+            this.orderUiState.smsSuccessful = false;
+            this.orderUiState.smsNotice = _t("Please enter a valid phone number to send the SMS receipt.");
             return;
         }
 
         // Basic phone validation
         const phoneRegex = /^[+]?[\d\s\-\(\)]{7,}$/;
         if (!phoneRegex.test(phone)) {
-            this.popup.add(ErrorPopup, {
-                title: this.env._t("Invalid Phone Number"),
-                body: this.env._t("The entered phone number format is not valid."),
-            });
+            this.orderUiState.smsSuccessful = false;
+            this.orderUiState.smsNotice = _t("The entered phone number format is not valid.");
             return;
         }
 
+        // Set loading state
+        this.orderUiState.isSmsSending = true;
+
         try {
+            let orderId = order.backendId || order.server_id || order.id;
+            
+            // If order doesn't exist in backend yet (offline mode), create it first
+            if (!orderId) {
+                console.log("Order not in backend yet, creating order first...");
+                
+                // Check if we're online before attempting to create order
+                if (!navigator.onLine) {
+                    this.orderUiState.smsSuccessful = false;
+                    this.orderUiState.smsNotice = _t("Cannot send SMS while offline. Please connect to internet and try again.");
+                    return;
+                }
+                
+                // Save the order to backend first
+                try {
+                    const orderData = order.export_as_JSON();
+                    orderData.phone_for_sms_receipt = phone; // Add phone number to order data
+                    
+                    const createdOrder = await this.orm.call(
+                        'pos.order',
+                        'create_from_ui_with_sms',
+                        [[orderData], phone]
+                    );
+                    
+                    if (createdOrder && createdOrder.length > 0) {
+                        orderId = createdOrder[0].id;
+                        order.backendId = orderId; // Store for future reference
+                        console.log("Order created in backend with ID:", orderId);
+                    } else {
+                        throw new Error("Failed to create order in backend");
+                    }
+                } catch (createError) {
+                    console.error("Error creating order in backend:", createError);
+                    this.orderUiState.smsSuccessful = false;
+                    
+                    // Check if it's a connection error
+                    if (createError.message && createError.message.includes('network')) {
+                        this.orderUiState.smsNotice = _t("Network error. Please check your connection and try again.");
+                    } else {
+                        this.orderUiState.smsNotice = _t("Failed to save order to backend for SMS sending.");
+                    }
+                    return;
+                }
+            }
+
+            console.log("Sending SMS for order ID:", orderId);
             const result = await this.orm.call(
                 'pos.order',
                 'action_send_sms_receipt_rpc',
-                [order.backendId, phone]
+                [orderId, phone]
             );
 
             if (result === true) {
-                this.notification.add(
-                    this.env._t("SMS receipt sent successfully to %s.", phone),
-                    { type: 'success' }
-                );
+                this.orderUiState.smsSuccessful = true;
+                this.orderUiState.smsNotice = _t("SMS receipt sent successfully to %s.", phone);
                 order.is_sms_receipt_sent = true;
+                // Store phone number in order for future reference
+                order.phone_for_sms_receipt = phone;
             } else if (result && result.error) {
-                this.popup.add(ErrorPopup, {
-                    title: this.env._t("SMS Sending Failed"),
-                    body: this.env._t(result.error),
-                });
+                this.orderUiState.smsSuccessful = false;
+                this.orderUiState.smsNotice = _t("SMS Sending Failed: %s", result.error);
             } else {
-                this.popup.add(ErrorPopup, {
-                    title: this.env._t("SMS Sending Failed"),
-                    body: this.env._t("An unknown error occurred while sending the SMS."),
-                });
+                this.orderUiState.smsSuccessful = false;
+                this.orderUiState.smsNotice = _t("An unknown error occurred while sending the SMS.");
             }
 
         } catch (error) {
             console.error("Error sending SMS receipt:", error);
-            let errorMessage = this.env._t("Could not connect to the server or an unexpected error occurred.");
+            let errorMessage = _t("Could not connect to the server or an unexpected error occurred.");
             
             if (error.data && error.data.message) {
                 errorMessage = error.data.message;
@@ -92,10 +142,11 @@ patch(ReceiptScreen.prototype, {
                 errorMessage = error.message;
             }
             
-            this.popup.add(ErrorPopup, {
-                title: this.env._t("SMS Sending Error"),
-                body: errorMessage,
-            });
+            this.orderUiState.smsSuccessful = false;
+            this.orderUiState.smsNotice = errorMessage;
+        } finally {
+            // Clear loading state
+            this.orderUiState.isSmsSending = false;
         }
     },
 

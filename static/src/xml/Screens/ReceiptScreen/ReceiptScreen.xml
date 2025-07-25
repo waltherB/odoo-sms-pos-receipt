@@ -1,28 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-    <t t-name="pos_sms_receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
-        <!-- Add SMS controls - try multiple locations -->
-        <xpath expr="//div" position="after">
-            <div class="sms-receipt-section d-flex flex-column gap-2 p-3 border rounded mt-3 bg-warning">
-                <h5 class="mb-2 text-dark">
+    <t t-name="odoo-sms-pos-receipt.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
+        <!-- Add SMS section after the buttons div, following the same pattern as WhatsApp module -->
+        <xpath expr="//div[hasclass('buttons')]" position="after">
+            <div class="sms-receipt-section my-3">
+                <h6 class="mb-3">
                     <i class="fa fa-comment me-2"/>
-                    SMS Receipt Test - This should be visible!
-                </h5>
+                    Send SMS Receipt
+                </h6>
                 
-                <div class="d-flex flex-column gap-2">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">
+                        <i class="fa fa-phone"/>
+                    </span>
                     <input type="tel"
                            class="form-control"
-                           placeholder="Enter phone number"
-                           t-model="smsPhoneNumber"
+                           placeholder="Enter phone number (+1234567890)"
+                           t-model="orderUiState.inputSmsPhone"
                            aria-label="Phone number for SMS receipt"/>
-                    
-                    <button class="btn btn-success w-100" 
-                            t-on-click="sendSmsReceipt">
-                        <i class="fa fa-paper-plane me-2"/>
-                        Send SMS Receipt
-                    </button>
                 </div>
+                
+                <button class="btn btn-success w-100 py-2" 
+                        t-on-click="sendSmsReceipt"
+                        t-att-disabled="!orderUiState.inputSmsPhone">
+                    <i class="fa fa-paper-plane me-2"
+                       t-if="!orderUiState.isSmsSending"/>
+                    <i class="fa fa-spinner fa-spin me-2"
+                       t-if="orderUiState.isSmsSending"/>
+                    Send SMS Receipt
+                </button>
+                
+                <div class="notice mt-2">
+                    <div t-if="orderUiState.smsSuccessful !== null"
+                         t-attf-class="{{ orderUiState.smsSuccessful ? 'successful text-success' : 'failed text-danger' }}">
+                        <t t-esc="orderUiState.smsNotice"/>
+                    </div>
+                </div>
+                
+                <small class="text-muted d-block mt-1">
+                    Enter phone number with country code (e.g., +1234567890)
+                </small>
             </div>
         </xpath>
     </t>
