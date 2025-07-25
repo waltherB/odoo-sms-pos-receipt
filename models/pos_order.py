@@ -133,12 +133,12 @@ class PosOrder(models.Model):
         """Get SMS template for POS receipt."""
         try:
             return self.env.ref(
-                'pos_sms_receipt.sms_template_pos_receipt',
+                'odoo-sms-pos-receipt.sms_template_pos_receipt',
                 raise_if_not_found=True
             )
         except ValueError:
             _logger.warning(
-                "SMS template 'pos_sms_receipt.sms_template_pos_receipt' "
+                "SMS template 'odoo-sms-pos-receipt.sms_template_pos_receipt' "
                 "not found."
             )
             return False
@@ -201,8 +201,9 @@ class PosOrder(models.Model):
             except Exception as send_error:
                 # Handle specific SMS gateway errors
                 error_str = str(send_error)
-                if 'failure_type' in error_str and 'sms_server_error' in error_str:
-                    # This is a known issue with gatewayapi-sms module
+                if ('failure_type' in error_str and 'sms_server_error' in error_str) or \
+                   ('_get_sms_account' in error_str and 'read-only' in error_str):
+                    # These are known issues with gatewayapi-sms module
                     # The SMS might have been sent despite the error
                     _logger.warning(
                         "SMS gateway compatibility issue for order %s: %s", 
@@ -214,7 +215,15 @@ class PosOrder(models.Model):
                         _logger.info("SMS was sent successfully despite the error")
                         return  # SMS was sent successfully
                     else:
-                        raise Exception("SMS sending failed due to gateway compatibility issue")
+                        # Wait a moment and check again (SMS might be queued)
+                        import time
+                        time.sleep(1)
+                        sms_record.refresh()
+                        if sms_record.state in ['sent', 'outgoing']:
+                            _logger.info("SMS was sent successfully (after delay)")
+                            return
+                        else:
+                            raise Exception("SMS sending failed due to gateway compatibility issue")
                 else:
                     # Re-raise other errors
                     raise send_error
