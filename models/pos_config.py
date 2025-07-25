@@ -7,7 +7,7 @@ class PosConfig(models.Model):
 
     enable_sms_receipt = fields.Boolean(
         string="Enable SMS Receipts",
-        default=True,
+        default=False,
         help="If checked, cashiers will see an option to send receipts "
              "via SMS in this Point of Sale."
     )
