@@ -195,7 +195,29 @@ class PosOrder(models.Model):
             }
             
             sms_record = self.env['sms.sms'].create(sms_vals)
-            sms_record._send()
+            
+            try:
+                sms_record._send()
+            except Exception as send_error:
+                # Handle specific SMS gateway errors
+                error_str = str(send_error)
+                if 'failure_type' in error_str and 'sms_server_error' in error_str:
+                    # This is a known issue with gatewayapi-sms module
+                    # The SMS might have been sent despite the error
+                    _logger.warning(
+                        "SMS gateway compatibility issue for order %s: %s", 
+                        self.name, error_str
+                    )
+                    # Check if the SMS was actually sent by looking at the record state
+                    sms_record.refresh()
+                    if sms_record.state in ['sent', 'outgoing']:
+                        _logger.info("SMS was sent successfully despite the error")
+                        return  # SMS was sent successfully
+                    else:
+                        raise Exception("SMS sending failed due to gateway compatibility issue")
+                else:
+                    # Re-raise other errors
+                    raise send_error
             
             # Check if sending was successful
             if sms_record.state == 'error':
