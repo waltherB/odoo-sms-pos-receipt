@@ -5,25 +5,31 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
-console.log("🚀 POS SMS Receipt - ReceiptScreen.js loaded!");
+
 
 patch(ReceiptScreen.prototype, {
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
-        this.popup = useService("popup");
-        this.orm = useService("orm");
         
-        // Initialize SMS phone number and states in orderUiState like email
-        // Note: this.currentOrder is already available from the parent class
-        const partner = this.currentOrder.get_partner();
-        this.orderUiState.inputSmsPhone = this.orderUiState.inputSmsPhone || 
-            (partner && (partner.mobile || partner.phone)) || "";
+
         
-        // Initialize SMS states
-        this.orderUiState.isSmsSending = false;
-        this.orderUiState.smsSuccessful = null;
-        this.orderUiState.smsNotice = "";
+        // Only initialize SMS services if SMS is enabled
+        if (this.pos.config.enable_sms_receipt) {
+            this.notification = useService("notification");
+            this.popup = useService("popup");
+            this.orm = useService("orm");
+            
+            // Initialize SMS phone number and states in orderUiState like email
+            // Note: this.currentOrder is already available from the parent class
+            const partner = this.currentOrder.get_partner();
+            this.orderUiState.inputSmsPhone = this.orderUiState.inputSmsPhone || 
+                (partner && (partner.mobile || partner.phone)) || "";
+            
+            // Initialize SMS states
+            this.orderUiState.isSmsSending = false;
+            this.orderUiState.smsSuccessful = null;
+            this.orderUiState.smsNotice = "";
+        }
     },
 
     get smsPhoneNumber() {
@@ -70,8 +76,6 @@ patch(ReceiptScreen.prototype, {
             
             // If order doesn't exist in backend yet (offline mode), create it first
             if (!orderId) {
-                console.log("Order not in backend yet, creating order first...");
-                
                 // Check if we're online before attempting to create order
                 if (!navigator.onLine) {
                     this.orderUiState.smsSuccessful = false;
@@ -93,12 +97,10 @@ patch(ReceiptScreen.prototype, {
                     if (createdOrder && createdOrder.length > 0) {
                         orderId = createdOrder[0].id;
                         order.backendId = orderId; // Store for future reference
-                        console.log("Order created in backend with ID:", orderId);
                     } else {
                         throw new Error("Failed to create order in backend");
                     }
                 } catch (createError) {
-                    console.error("Error creating order in backend:", createError);
                     this.orderUiState.smsSuccessful = false;
                     
                     // Check if it's a connection error
@@ -110,8 +112,6 @@ patch(ReceiptScreen.prototype, {
                     return;
                 }
             }
-
-            console.log("Sending SMS for order ID:", orderId);
             const result = await this.orm.call(
                 'pos.order',
                 'action_send_sms_receipt_rpc',
@@ -133,7 +133,6 @@ patch(ReceiptScreen.prototype, {
             }
 
         } catch (error) {
-            console.error("Error sending SMS receipt:", error);
             let errorMessage = _t("Could not connect to the server or an unexpected error occurred.");
             
             if (error.data && error.data.message) {
@@ -150,14 +149,5 @@ patch(ReceiptScreen.prototype, {
         }
     },
 
-    get shouldShowSmsFeature() {
-        // Always show for testing - remove this later
-        console.log('SMS Feature Check:', {
-            pos: !!this.pos,
-            config: !!this.pos?.config,
-            enable_sms_receipt: this.pos?.config?.enable_sms_receipt
-        });
-        return true; // Force show for debugging
-        // return this.pos?.config?.enable_sms_receipt;
-    }
+
 });

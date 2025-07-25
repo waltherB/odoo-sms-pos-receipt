@@ -8,27 +8,7 @@ _logger = logging.getLogger(__name__)
 class IapAccount(models.Model):
     _inherit = 'iap.account'
 
-    def name_get(self):
-        """Override name_get to show proper account names for SMS accounts."""
-        result = []
-        for record in self:
-            if record.service_name == 'sms':
-                # For SMS accounts, always use the name field if it exists
-                if record.name and record.name.strip():
-                    display_name = record.name
-                else:
-                    display_name = f"SMS Account (ID: {record.id})"
-                
-                result.append((record.id, display_name))
-            else:
-                # For non-SMS accounts, use the parent method
-                parent_result = super(IapAccount, record).name_get()
-                if parent_result:
-                    result.extend(parent_result)
-                else:
-                    result.append((record.id, f"Account {record.id}"))
-        
-        return result
+
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
