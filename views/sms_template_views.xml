@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menu item for SMS Template configuration -->
+        <record id="action_sms_template_pos_receipt" model="ir.actions.act_window">
+            <field name="name">POS SMS Receipt Templates</field>
+            <field name="res_model">sms.template</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('model_id.model', '=', 'pos.order')]</field>
+            <field name="context">{'default_model': 'pos.order'}</field>
+        </record>
+
+        <menuitem id="menu_pos_sms_template"
+                  name="SMS Receipt Templates"
+                  parent="point_of_sale.menu_point_config_product"
+                  action="action_sms_template_pos_receipt"
+                  sequence="50"/>
+    </data>
+</odoo>
