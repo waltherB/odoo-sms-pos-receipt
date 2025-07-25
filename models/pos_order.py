@@ -186,10 +186,8 @@ class PosOrder(models.Model):
     def _send_sms_message(self, phone, body):
         """Send SMS message using configured gateway."""
         try:
-            # Get SMS gateway from POS config
-            gateway = self.config_id.sms_gateway_id
-            
-            # Create SMS record
+            # Create SMS record and send it using the default gateway
+            # Note: Gateway selection is handled by the SMS gateway module configuration
             sms_vals = {
                 'number': phone,
                 'body': body,
@@ -197,28 +195,7 @@ class PosOrder(models.Model):
             }
             
             sms_record = self.env['sms.sms'].create(sms_vals)
-            
-            # If a specific gateway is configured for this POS, we need to 
-            # temporarily override the default SMS account selection
-            if gateway and gateway.service_name == 'sms':
-                # Monkey patch the _get_sms_account method temporarily
-                original_method = self.env['iap.account']._get_sms_account
-                
-                def custom_get_sms_account():
-                    return gateway
-                
-                # Temporarily replace the method
-                self.env['iap.account']._get_sms_account = custom_get_sms_account
-                
-                try:
-                    # Send the SMS with the custom gateway
-                    sms_record._send()
-                finally:
-                    # Restore the original method
-                    self.env['iap.account']._get_sms_account = original_method
-            else:
-                # Use default gateway
-                sms_record._send()
+            sms_record._send()
             
             # Check if sending was successful
             if sms_record.state == 'error':
