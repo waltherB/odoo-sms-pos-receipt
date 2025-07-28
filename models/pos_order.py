@@ -98,9 +98,8 @@ class PosOrder(models.Model):
                 'is_sms_receipt_sent': True,
                 'sms_receipt_error': False
             })
-            self.message_post(
-                body=_("Receipt sent via SMS to %s.") % cleaned_phone
-            )
+            # Log success (pos.order doesn't support message_post)
+            _logger.info("SMS receipt logged for order %s", self.name)
             _logger.info(
                 "SMS receipt sent for order %s to %s",
                 self.name, cleaned_phone
@@ -126,9 +125,8 @@ class PosOrder(models.Model):
                     'is_sms_receipt_sent': True,
                     'sms_receipt_error': False
                 })
-                self.message_post(
-                    body=_("Receipt sent via SMS to %s.") % cleaned_phone
-                )
+                # Log success (pos.order doesn't support message_post)
+                _logger.info("SMS receipt logged for order %s", self.name)
                 _logger.info(
                     "SMS receipt marked as sent for order %s to %s (compatibility issue handled)",
                     self.name, cleaned_phone
