@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from datetime import timedelta
 import logging
 import re
 
@@ -108,6 +109,38 @@ class PosOrder(models.Model):
 
         except Exception as e:
             error_msg = str(e)
+            
+            # Handle known gatewayapi-sms compatibility issues
+            if ('_get_sms_account' in error_msg and 'read-only' in error_msg) or \
+               ('failure_type' in error_msg and 'sms_server_error' in error_msg):
+                # These are known compatibility issues but SMS might still be sent
+                _logger.warning(
+                    "SMS gateway compatibility warning for order %s to %s: %s",
+                    self.name, cleaned_phone, error_msg
+                )
+                
+                # Check if SMS was actually sent by looking for recent SMS records
+                recent_sms = self.env['sms.sms'].search([
+                    ('number', '=', cleaned_phone),
+                    ('create_date', '>=', fields.Datetime.now() - timedelta(minutes=1))
+                ], limit=1)
+                
+                if recent_sms and recent_sms.state in ['sent', 'outgoing']:
+                    # SMS was sent successfully despite the error
+                    self.write({
+                        'is_sms_receipt_sent': True,
+                        'sms_receipt_error': False
+                    })
+                    self.message_post(
+                        body=_("Receipt sent via SMS to %s.") % cleaned_phone
+                    )
+                    _logger.info(
+                        "SMS receipt sent successfully for order %s to %s (despite compatibility warning)",
+                        self.name, cleaned_phone
+                    )
+                    return True
+            
+            # For other errors, log and return error
             self.write({'sms_receipt_error': error_msg})
             _logger.error(
                 "Failed to send SMS receipt for order %s to %s: %s",
