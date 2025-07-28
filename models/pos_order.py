@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from datetime import timedelta
 import logging
 import re
 
@@ -108,6 +109,38 @@ class PosOrder(models.Model):
 
         except Exception as e:
             error_msg = str(e)
+            
+            # Handle known gatewayapi-sms compatibility issues
+            if ('_get_sms_account' in error_msg and 'read-only' in error_msg) or \
+               ('failure_type' in error_msg and 'sms_server_error' in error_msg):
+                # These are known compatibility issues but SMS might still be sent
+                _logger.warning(
+                    "SMS gateway compatibility warning for order %s to %s: %s",
+                    self.name, cleaned_phone, error_msg
+                )
+                
+                # Check if SMS was actually sent by looking for recent SMS records
+                recent_sms = self.env['sms.sms'].search([
+                    ('number', '=', cleaned_phone),
+                    ('create_date', '>=', fields.Datetime.now() - timedelta(minutes=1))
+                ], limit=1)
+                
+                if recent_sms and recent_sms.state in ['sent', 'outgoing']:
+                    # SMS was sent successfully despite the error
+                    self.write({
+                        'is_sms_receipt_sent': True,
+                        'sms_receipt_error': False
+                    })
+                    self.message_post(
+                        body=_("Receipt sent via SMS to %s.") % cleaned_phone
+                    )
+                    _logger.info(
+                        "SMS receipt sent successfully for order %s to %s (despite compatibility warning)",
+                        self.name, cleaned_phone
+                    )
+                    return True
+            
+            # For other errors, log and return error
             self.write({'sms_receipt_error': error_msg})
             _logger.error(
                 "Failed to send SMS receipt for order %s to %s: %s",
@@ -133,12 +166,12 @@ class PosOrder(models.Model):
         """Get SMS template for POS receipt."""
         try:
             return self.env.ref(
-                'pos_sms_receipt.sms_template_pos_receipt',
+                'odoo-sms-pos-receipt.sms_template_pos_receipt',
                 raise_if_not_found=True
             )
         except ValueError:
             _logger.warning(
-                "SMS template 'pos_sms_receipt.sms_template_pos_receipt' "
+                "SMS template 'odoo-sms-pos-receipt.sms_template_pos_receipt' "
                 "not found."
             )
             return False
@@ -186,10 +219,8 @@ class PosOrder(models.Model):
     def _send_sms_message(self, phone, body):
         """Send SMS message using configured gateway."""
         try:
-            # Get SMS gateway from POS config
-            gateway = self.config_id.sms_gateway_id
-            
-            # Create SMS record
+            # Create SMS record and send it using the default gateway
+            # Note: Gateway selection is handled by the SMS gateway module configuration
             sms_vals = {
                 'number': phone,
                 'body': body,
@@ -198,27 +229,37 @@ class PosOrder(models.Model):
             
             sms_record = self.env['sms.sms'].create(sms_vals)
             
-            # If a specific gateway is configured for this POS, we need to 
-            # temporarily override the default SMS account selection
-            if gateway and gateway.service_name == 'sms':
-                # Monkey patch the _get_sms_account method temporarily
-                original_method = self.env['iap.account']._get_sms_account
-                
-                def custom_get_sms_account():
-                    return gateway
-                
-                # Temporarily replace the method
-                self.env['iap.account']._get_sms_account = custom_get_sms_account
-                
-                try:
-                    # Send the SMS with the custom gateway
-                    sms_record._send()
-                finally:
-                    # Restore the original method
-                    self.env['iap.account']._get_sms_account = original_method
-            else:
-                # Use default gateway
+            try:
                 sms_record._send()
+            except Exception as send_error:
+                # Handle specific SMS gateway errors
+                error_str = str(send_error)
+                if ('failure_type' in error_str and 'sms_server_error' in error_str) or \
+                   ('_get_sms_account' in error_str and 'read-only' in error_str):
+                    # These are known issues with gatewayapi-sms module
+                    # The SMS might have been sent despite the error
+                    _logger.warning(
+                        "SMS gateway compatibility issue for order %s: %s", 
+                        self.name, error_str
+                    )
+                    # Check if the SMS was actually sent by looking at the record state
+                    sms_record.refresh()
+                    if sms_record.state in ['sent', 'outgoing']:
+                        _logger.info("SMS was sent successfully despite the error")
+                        return  # SMS was sent successfully
+                    else:
+                        # Wait a moment and check again (SMS might be queued)
+                        import time
+                        time.sleep(1)
+                        sms_record.refresh()
+                        if sms_record.state in ['sent', 'outgoing']:
+                            _logger.info("SMS was sent successfully (after delay)")
+                            return
+                        else:
+                            raise Exception("SMS sending failed due to gateway compatibility issue")
+                else:
+                    # Re-raise other errors
+                    raise send_error
             
             # Check if sending was successful
             if sms_record.state == 'error':
