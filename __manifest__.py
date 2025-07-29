@@ -31,6 +31,7 @@ Key Features:
     'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
+        'security/sms_receipt_template_security.csv',
         'data/sms_template_data.xml',
         'data/sms_receipt_template_data.xml',
         'data/setup_sms_accounts.xml',
