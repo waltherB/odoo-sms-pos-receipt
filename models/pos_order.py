@@ -80,19 +80,17 @@ class PosOrder(models.Model):
             self.write({'phone_for_sms_receipt': phone_number})
 
         try:
-            # Get SMS template
-            sms_template = self._get_sms_template()
-            _logger.info("SMS template found: %s", sms_template.name if sms_template else "None")
+            # TEMPORARY: Skip template rendering and use simple hardcoded message
+            # This will test if basic SMS sending works
+            body = f"""Receipt for Order: {self.name}
+Date: {self.date_order.strftime('%d-%m-%Y %H:%M')}
+Company: {self.company_id.name}
+Total: {self.amount_total:.2f} kr
 
-            if sms_template:
-                # Render template body
-                body = self._render_sms_body(sms_template)
-                _logger.info("Rendered SMS body length: %d", len(body))
-                _logger.info("SMS body preview: %s", body[:100] + "..." if len(body) > 100 else body)
-            else:
-                # Fallback message
-                body = self._get_fallback_sms_body()
-                _logger.info("Using fallback SMS body")
+Thank you for your purchase!"""
+            
+            _logger.info("Using hardcoded SMS body for testing")
+            _logger.info("SMS body: %s", body)
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
