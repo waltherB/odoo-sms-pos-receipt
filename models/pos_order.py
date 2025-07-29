@@ -82,13 +82,17 @@ class PosOrder(models.Model):
         try:
             # Get SMS template
             sms_template = self._get_sms_template()
+            _logger.info("SMS template found: %s", sms_template.name if sms_template else "None")
 
             if sms_template:
                 # Render template body
                 body = self._render_sms_body(sms_template)
+                _logger.info("Rendered SMS body length: %d", len(body))
+                _logger.info("SMS body preview: %s", body[:100] + "..." if len(body) > 100 else body)
             else:
                 # Fallback message
                 body = self._get_fallback_sms_body()
+                _logger.info("Using fallback SMS body")
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
