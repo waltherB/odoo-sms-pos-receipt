@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_pos_order_sms_manager,pos.order.sms.manager,point_of_sale.model_pos_order,point_of_sale.group_pos_manager,1,1,1,0
 access_pos_config_sms_manager,pos.config.sms.manager,point_of_sale.model_pos_config,point_of_sale.group_pos_manager,1,1,1,0
-access_sms_template_pos_manager,sms.template.pos.manager,sms.model_sms_template,point_of_sale.group_pos_manager,1,1,1,0
+access_sms_template_pos_manager,sms.template.pos.manager,sms.model_sms_template,point_of_sale.group_pos_manager,1,1,1,0access_sm
+s_receipt_template_pos_manager,sms.receipt.template.pos.manager,model_sms_receipt_template,point_of_sale.group_pos_manager,1,1,1,1

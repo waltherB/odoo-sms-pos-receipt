@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- SMS Receipt Template Form View -->
+        <record id="view_sms_receipt_template_form" model="ir.ui.view">
+            <field name="name">sms.receipt.template.form</field>
+            <field name="model">sms.receipt.template</field>
+            <field name="arch" type="xml">
+                <form string="SMS Receipt Template">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Template Name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="company_id"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Company Information" name="company_info">
+                                <group>
+                                    <field name="show_company_info"/>
+                                    <field name="company_info_template" 
+                                           widget="text" 
+                                           invisible="not show_company_info"
+                                           placeholder="Available variables: {company_name}, {phone_line}, {vat_line}, {email_line}, {website_line}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Order Information" name="order_info">
+                                <group>
+                                    <field name="show_separator"/>
+                                    <field name="separator_line" invisible="not show_separator"/>
+                                    <field name="show_order_info"/>
+                                    <field name="order_info_template" 
+                                           widget="text" 
+                                           invisible="not show_order_info"
+                                           placeholder="Available variables: {served_by_line}, {order_name}, {order_date}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Items &amp; Total" name="items_total">
+                                <group>
+                                    <field name="show_items"/>
+                                    <field name="item_line_template" 
+                                           invisible="not show_items"
+                                           placeholder="Available variables: {product_name}, {qty}, {price}"/>
+                                    <field name="show_total"/>
+                                    <field name="total_template" 
+                                           widget="text" 
+                                           invisible="not show_total"
+                                           placeholder="Available variables: {total}, {payment_method}, {amount}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Tax &amp; Customer" name="tax_customer">
+                                <group>
+                                    <field name="show_tax"/>
+                                    <field name="tax_template" 
+                                           widget="text" 
+                                           invisible="not show_tax"
+                                           placeholder="Available variables: {tax_amount}, {tax_base}, {total}"/>
+                                    <field name="show_customer"/>
+                                    <field name="customer_template" 
+                                           invisible="not show_customer"
+                                           placeholder="Available variables: {customer_name}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Footer" name="footer">
+                                <group>
+                                    <field name="show_footer"/>
+                                    <field name="footer_template" 
+                                           widget="text" 
+                                           invisible="not show_footer"
+                                           placeholder="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Preview" name="preview">
+                                <group>
+                                    <field name="preview_text" 
+                                           widget="text" 
+                                           readonly="1"
+                                           string="Template Preview"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <!-- SMS Receipt Template Tree View -->
+        <record id="view_sms_receipt_template_tree" model="ir.ui.view">
+            <field name="name">sms.receipt.template.tree</field>
+            <field name="model">sms.receipt.template</field>
+            <field name="arch" type="xml">
+                <tree string="SMS Receipt Templates">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- SMS Receipt Template Action -->
+        <record id="action_sms_receipt_template" model="ir.actions.act_window">
+            <field name="name">SMS Receipt Templates</field>
+            <field name="res_model">sms.receipt.template</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first SMS receipt template!
+                </p>
+                <p>
+                    SMS receipt templates allow you to customize how your POS receipts 
+                    appear when sent via SMS to customers.
+                </p>
+            </field>
+        </record>
+        
+        <!-- Menu Item -->
+        <menuitem id="menu_sms_receipt_template"
+                  name="SMS Receipt Templates"
+                  parent="point_of_sale.menu_point_config_product"
+                  action="action_sms_receipt_template"
+                  sequence="50"/>
+    </data>
+</odoo>

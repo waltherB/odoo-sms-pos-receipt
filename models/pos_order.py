@@ -80,15 +80,9 @@ class PosOrder(models.Model):
             self.write({'phone_for_sms_receipt': phone_number})
 
         try:
-            # Create a simple hardcoded message with actual data
-            body = f"""Receipt for Order: {self.name}
-Date: {self.date_order.strftime('%d-%m-%Y %H:%M')}
-Company: {self.company_id.name}
-Total: {self.amount_total:.2f} kr
-
-Thank you for your purchase!"""
-            
-            _logger.info("Created hardcoded SMS body: %s", body)
+            # Use customizable SMS receipt template
+            body = self._render_custom_sms_receipt()
+            _logger.info("Created customizable SMS receipt body")
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
@@ -313,4 +307,107 @@ Thank you for your purchase!"""
                 'message': _('SMS receipt sent successfully to %s') % phone_to_use,
                 'type': 'success',
             }
-        }
+        } 
+   def _render_custom_sms_receipt(self):
+        """Render SMS receipt using customizable template."""
+        # Get the template for this company
+        template = self.env['sms.receipt.template'].get_default_template(self.company_id.id)
+        
+        body_parts = []
+        
+        # Company Information
+        if template.show_company_info and template.company_info_template:
+            phone_line = f"Telefon: {self.company_id.phone}" if self.company_id.phone else ""
+            vat_line = f"CVR: {self.company_id.vat}" if self.company_id.vat else ""
+            email_line = self.company_id.email if self.company_id.email else ""
+            website_line = self.company_id.website if self.company_id.website else ""
+            
+            company_info = template.company_info_template.format(
+                company_name=self.company_id.name,
+                phone_line=phone_line,
+                vat_line=vat_line,
+                email_line=email_line,
+                website_line=website_line
+            )
+            # Remove empty lines
+            company_info = '\n'.join(line for line in company_info.split('\n') if line.strip())
+            body_parts.append(company_info)
+        
+        # Separator
+        if template.show_separator and template.separator_line:
+            body_parts.append(template.separator_line)
+        
+        # Order Information
+        if template.show_order_info and template.order_info_template:
+            served_by_line = f"Betjent af {self.partner_id.name}" if self.partner_id and self.partner_id.name else ""
+            
+            order_info = template.order_info_template.format(
+                served_by_line=served_by_line,
+                order_name=self.name,
+                order_date=self.date_order.strftime('%d-%m-%Y %H:%M')
+            )
+            # Remove empty lines
+            order_info = '\n'.join(line for line in order_info.split('\n') if line.strip())
+            body_parts.append(order_info)
+        
+        # Items
+        if template.show_items and template.item_line_template:
+            items_text = ""
+            for line in self.lines:
+                item_line = template.item_line_template.format(
+                    product_name=line.product_id.name,
+                    qty=f"{line.qty:.0f}",
+                    price=f"{line.price_subtotal_incl:.2f}"
+                )
+                items_text += item_line + "\n"
+            if items_text:
+                body_parts.append(items_text.rstrip())
+        
+        # Total
+        if template.show_total and template.total_template:
+            payment_method = "Kontant"
+            if self.payment_ids:
+                payment_method = self.payment_ids[0].payment_method_id.name
+            
+            total_section = template.total_template.format(
+                total=f"{self.amount_total:.2f}",
+                payment_method=payment_method,
+                amount=f"{self.amount_total:.2f}"
+            )
+            body_parts.append(total_section)
+        
+        # Tax
+        if template.show_tax and template.tax_template and self.amount_tax > 0:
+            tax_base = self.amount_total - self.amount_tax
+            tax_section = template.tax_template.format(
+                tax_amount=f"{self.amount_tax:.2f}",
+                tax_base=f"{tax_base:.2f}",
+                total=f"{self.amount_total:.2f}"
+            )
+            body_parts.append(tax_section)
+        
+        # Customer
+        if template.show_customer and template.customer_template and self.partner_id and self.partner_id.name:
+            customer_section = template.customer_template.format(
+                customer_name=self.partner_id.name
+            )
+            body_parts.append(customer_section)
+        
+        # Footer
+        if template.show_footer and template.footer_template:
+            website_line = ""
+            if self.company_id.website:
+                website_line = f"Du kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
+            
+            footer_section = template.footer_template.format(
+                website_line=website_line,
+                unique_code=self.pos_reference or self.name,
+                order_name=self.name,
+                order_datetime=self.date_order.strftime('%d-%m-%Y %H:%M:%S')
+            )
+            # Remove empty lines
+            footer_section = '\n'.join(line for line in footer_section.split('\n') if line.strip())
+            body_parts.append(footer_section)
+        
+        # Join all parts
+        return '\n\n'.join(part for part in body_parts if part.strip())
