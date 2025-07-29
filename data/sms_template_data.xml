@@ -5,30 +5,57 @@
             <field name="name">POS Receipt SMS</field>
             <field name="model_id" ref="point_of_sale.model_pos_order"/>
             <field name="body">${object.company_id.name}
-${object.company_id.phone and 'Phone:' + object.company_id.phone or ''}
-${object.company_id.vat and 'VAT:' + object.company_id.vat or ''}
-${object.company_id.email and object.company_id.email or ''}
-${object.company_id.website and object.company_id.website or ''}
+% if object.company_id.phone:
+Telefon: ${object.company_id.phone}
+% endif
+% if object.company_id.vat:
+CVR: ${object.company_id.vat}
+% endif
+% if object.company_id.email:
+${object.company_id.email}
+% endif
+% if object.company_id.website:
+${object.company_id.website}
+% endif
 --------------------------------
-${object.partner_id.name and 'Served by ' + object.partner_id.name or ''}
+% if object.partner_id.name:
+Betjent af ${object.partner_id.name}
+% endif
 ${object.name}
 
 % for line in object.lines:
-${line.product_id.name}${' kr %.2f' % line.price_subtotal_incl}
-${('%.2f' % line.qty)} Qty x kr ${'%.2f' % (line.price_subtotal_incl / line.qty)} / Qty
+${line.product_id.name} kr ${'%.2f' % line.price_subtotal_incl}
+${'%.2f' % line.qty} Enheder x kr ${'%.2f' % (line.price_subtotal_incl / line.qty)} / Enheder
 % endfor
 --------
-TOTAL${' ' * 15}kr ${'%.2f' % object.amount_total}
+TOTAL                kr ${'%.2f' % object.amount_total}
 
-${object.payment_ids and object.payment_ids[0].payment_method_id.name or 'Cash'}${' ' * 10}${'%.2f' % object.amount_total}
-
-% if object.amount_tax > 0:
-VAT${' ' * 4}Amount${' ' * 4}Basis${' ' * 6}I alt
-25%${' ' * 5}${'%.2f' % object.amount_tax}${' ' * 4}${'%.2f' % (object.amount_total - object.amount_tax)}${' ' * 4}${'%.2f' % object.amount_total}
+% if object.payment_ids:
+${object.payment_ids[0].payment_method_id.name}          ${'%.2f' % object.amount_total}
+% else:
+Kontant          ${'%.2f' % object.amount_total}
 % endif
 
-${object.partner_id.name and 'Customer' + (' ' * 15) + object.partner_id.name or ''}
+BYTTEPENGE
+                     kr 0,00
 
+% if object.amount_tax > 0:
+Moms    Beløb    Basis      I alt
+25%     ${'%.2f' % object.amount_tax}    ${'%.2f' % (object.amount_total - object.amount_tax)}    ${'%.2f' % object.amount_total}
+% endif
+
+% if object.partner_id.name:
+Kunde               ${object.partner_id.name}
+% endif
+
+Scan mig for at anmode om en faktura for dit køb.
+
+% if object.company_id.website:
+Du kan gå til ${object.company_id.website} og brug koden nedenfor til at anmode om en faktura online
+% endif
+Unik kode: ${object.pos_reference or object.name}
+
+Powered by Odoo
 Ordre ${object.name}
 ${object.date_order.strftime('%d-%m-%Y %H:%M:%S')}</field>
         </record>
