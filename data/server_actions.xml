@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Server Action to Create Default SMS Receipt Templates -->
+        <record id="action_create_default_sms_templates" model="ir.actions.server">
+            <field name="name">Create Default SMS Receipt Templates</field>
+            <field name="model_id" ref="model_sms_receipt_template"/>
+            <field name="state">code</field>
+            <field name="code">
+# Create Complete SMS Receipt Template
+complete_template = env['sms.receipt.template'].search([('name', '=', 'Complete SMS Receipt Template')])
+if not complete_template:
+    complete_template = env['sms.receipt.template'].create({
+        'name': 'Complete SMS Receipt Template',
+        'active': True,
+        'show_company_info': True,
+        'company_info_template': '{company_name}\n{phone_line}\n{vat_line}\n{email_line}\n{website_line}',
+        'show_separator': True,
+        'separator_line': '--------------------------------',
+        'show_order_info': True,
+        'order_info_template': '{served_by_line}\nOrdre: {order_name}\nDato: {order_date}',
+        'show_items': True,
+        'item_line_template': '{qty}x {product_name} = {price} kr',
+        'show_total': True,
+        'total_template': '--------\nTOTAL                kr {total}\n\n{payment_method}          {amount}\n\nBYTTEPENGE\n                     kr {change}',
+        'show_tax': True,
+        'tax_template': 'Moms    Beløb    Basis      I alt\n25%     {tax_amount} kr  {tax_base} kr  {total} kr',
+        'show_customer': True,
+        'customer_template': 'Kunde: {customer_name}',
+        'show_footer': True,
+        'footer_template': 'Tak for dit køb!\n\n{website_line}\n\n{ticket_code_line}\n\nUnik kode: {unique_code}\nOrdre: {order_name}\n{order_datetime}'
+    })
+
+# Create Minimal SMS Receipt Template
+minimal_template = env['sms.receipt.template'].search([('name', '=', 'Minimal SMS Receipt')])
+if not minimal_template:
+    minimal_template = env['sms.receipt.template'].create({
+        'name': 'Minimal SMS Receipt',
+        'active': True,
+        'show_company_info': True,
+        'company_info_template': '{company_name}',
+        'show_separator': False,
+        'show_order_info': True,
+        'order_info_template': 'Ordre: {order_name} - {order_date}',
+        'show_items': True,
+        'item_line_template': '{qty}x {product_name} {price}kr',
+        'show_total': True,
+        'total_template': 'Total: {total} kr ({payment_method})',
+        'show_tax': False,
+        'show_customer': True,
+        'customer_template': 'Kunde: {customer_name}',
+        'show_footer': True,
+        'footer_template': 'Tak for dit køb! {website_line}\n{ticket_code_line}\nRef: {unique_code}'
+    })
+
+# Show notification
+env.user.notify_success(message="Default SMS Receipt Templates created successfully!")
+            </field>
+        </record>
+        
+        <!-- Menu item for the server action -->
+        <record id="menu_create_default_sms_templates" model="ir.ui.menu">
+            <field name="name">Create Default SMS Templates</field>
+            <field name="action" ref="action_create_default_sms_templates"/>
+            <field name="parent_id" ref="base.menu_administration"/>
+            <field name="sequence">101</field>
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+    </data>
+</odoo>
