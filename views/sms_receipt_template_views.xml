@@ -236,19 +236,12 @@
             </field>
         </record>
         
-        <!-- SMS Receipt Templates Menu Item - Multiple locations for accessibility -->
-        <menuitem id="menu_sms_receipt_template_settings"
+        <!-- SMS Receipt Templates Menu Item - Under Point of Sale -->
+        <menuitem id="menu_sms_receipt_template_pos"
                   name="SMS Receipt Templates"
-                  parent="base.menu_administration"
+                  parent="point_of_sale.menu_point_root"
                   action="action_sms_receipt_template"
-                  sequence="100"
-                  groups="point_of_sale.group_pos_manager,base.group_system"/>
-                  
-        <!-- Also create a top-level menu for easy access -->
-        <menuitem id="menu_sms_receipt_template_main"
-                  name="SMS Templates"
-                  action="action_sms_receipt_template"
-                  sequence="95"
+                  sequence="60"
                   groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
     </data>
 </odoo>
