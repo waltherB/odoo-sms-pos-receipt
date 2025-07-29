@@ -32,6 +32,7 @@ Key Features:
     'data': [
         'security/ir.model.access.csv',
         'data/sms_template_data.xml',
+        'data/sms_receipt_template_data.xml',
         'data/setup_sms_accounts.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
@@ -48,4 +49,5 @@ Key Features:
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }

@@ -87,8 +87,8 @@ TOTAL                kr {total}
 {payment_method}          {amount}
 
 BYTTEPENGE
-                     kr 0,00""",
-        help="Available variables: {total}, {payment_method}, {amount}"
+                     kr {change}""",
+        help="Available variables: {total}, {payment_method}, {amount}, {change}"
     )
     
     show_tax = fields.Boolean(
@@ -129,7 +129,7 @@ Unik kode: {unique_code}
 Powered by Odoo
 Ordre {order_name}
 {order_datetime}""",
-        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}"
+        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}, {ticket_code_line}"
     )
     
     # Preview functionality
@@ -180,11 +180,23 @@ Ordre {order_name}
                 ) + "\n"
             
             if record.show_total and record.total_template:
-                preview += record.total_template.format(
-                    total="75.00",
-                    payment_method="Bank/MobilePay",
-                    amount="75.00"
-                ) + "\n"
+                # Create a safe template formatting function
+                template_vars = {
+                    'total': "75.00",
+                    'payment_method': "Kontant",
+                    'amount': "80.00",
+                    'change': "5.00"
+                }
+                
+                try:
+                    # Try to format with all variables
+                    total_preview = record.total_template
+                    for var, value in template_vars.items():
+                        total_preview = total_preview.replace('{' + var + '}', str(value))
+                    preview += total_preview + "\n"
+                except Exception:
+                    # Ultimate fallback - just show the template as-is
+                    preview += record.total_template + "\n"
             
             if record.show_tax and record.tax_template:
                 preview += record.tax_template.format(
@@ -203,11 +215,85 @@ Ordre {order_name}
                     website_line="Du kan gå til https://company.dk og brug koden nedenfor",
                     unique_code="Shop/001",
                     order_name="Shop/001",
-                    order_datetime="29-07-2025 08:30:15"
+                    order_datetime="29-07-2025 08:30:15",
+                    ticket_code_line="Ticket kode: ABC123 (hvis aktiveret i POS)"
                 )
             
             record.preview_text = preview
     
+    def action_preview(self):
+        """Force recompute of preview."""
+        self._compute_preview()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Preview Updated'),
+                'message': _('The SMS preview has been refreshed with current template settings.'),
+                'type': 'success',
+            }
+        }
+    
+    def fix_change_variable(self):
+        """Fix templates that have hardcoded change amounts."""
+        for record in self:
+            if record.total_template and 'kr 0,00' in record.total_template:
+                # Replace hardcoded change with variable
+                record.total_template = record.total_template.replace('kr 0,00', 'kr {change}')
+        return True
+    
+    @api.model
+    def create_default_templates(self):
+        """Create default SMS receipt templates."""
+        # Check if templates already exist
+        existing = self.search([('name', 'in', ['Complete SMS Receipt Template', 'Minimal SMS Receipt'])])
+        if existing:
+            return existing
+        
+        # Create complete template
+        complete_template = self.create({
+            'name': 'Complete SMS Receipt Template',
+            'active': True,
+            'show_company_info': True,
+            'company_info_template': '{company_name}\n{phone_line}\n{vat_line}\n{email_line}\n{website_line}',
+            'show_separator': True,
+            'separator_line': '--------------------------------',
+            'show_order_info': True,
+            'order_info_template': '{served_by_line}\nOrdre: {order_name}\nDato: {order_date}',
+            'show_items': True,
+            'item_line_template': '{qty}x {product_name} = {price} kr',
+            'show_total': True,
+            'total_template': '--------\nTOTAL                kr {total}\n\n{payment_method}          {amount}\n\nBYTTEPENGE\n                     kr {change}',
+            'show_tax': True,
+            'tax_template': 'Moms    Beløb    Basis      I alt\n25%     {tax_amount} kr  {tax_base} kr  {total} kr',
+            'show_customer': True,
+            'customer_template': 'Kunde: {customer_name}',
+            'show_footer': True,
+            'footer_template': 'Tak for dit køb!\n\n{website_line}\n\n{ticket_code_line}\n\nUnik kode: {unique_code}\nOrdre: {order_name}\n{order_datetime}'
+        })
+        
+        # Create minimal template
+        minimal_template = self.create({
+            'name': 'Minimal SMS Receipt',
+            'active': True,
+            'show_company_info': True,
+            'company_info_template': '{company_name}',
+            'show_separator': False,
+            'show_order_info': True,
+            'order_info_template': 'Ordre: {order_name} - {order_date}',
+            'show_items': True,
+            'item_line_template': '{qty}x {product_name} {price}kr',
+            'show_total': True,
+            'total_template': 'Total: {total} kr ({payment_method})',
+            'show_tax': False,
+            'show_customer': True,
+            'customer_template': 'Kunde: {customer_name}',
+            'show_footer': True,
+            'footer_template': 'Tak for dit køb! {website_line}\n{ticket_code_line}\nRef: {unique_code}'
+        })
+        
+        return complete_template + minimal_template
+
     @api.model
     def get_default_template(self, company_id=None):
         """Get the default SMS receipt template for a company."""
@@ -220,7 +306,16 @@ Ordre {order_name}
         ], limit=1)
         
         if not template:
-            # Create default template if none exists
+            # Try to find any active template for any company
+            template = self.search([('active', '=', True)], limit=1)
+            
+        if not template:
+            # Create default templates if none exist
+            templates = self.create_default_templates()
+            template = templates[0] if templates else None
+            
+        if not template:
+            # Last resort: create a simple template
             template = self.create({
                 'name': 'Default SMS Receipt',
                 'company_id': company_id

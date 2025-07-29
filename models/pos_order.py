@@ -80,9 +80,58 @@ class PosOrder(models.Model):
             self.write({'phone_for_sms_receipt': phone_number})
 
         try:
-            # Use customizable SMS receipt template
-            body = self._render_custom_sms_receipt()
-            _logger.info("Created customizable SMS receipt body")
+            # Create SMS receipt with proper Danish format
+            lines_text = ""
+            for line in self.lines:
+                lines_text += f"- {line.product_id.name} x{line.qty:.0f} = {line.price_subtotal_incl:.2f} kr\n"
+            
+            # Build the receipt
+            body = f"""{self.company_id.name}"""
+            
+            if self.company_id.phone:
+                body += f"\nTelefon: {self.company_id.phone}"
+            if self.company_id.vat:
+                body += f"\nCVR: {self.company_id.vat}"
+            if self.company_id.email:
+                body += f"\n{self.company_id.email}"
+            if self.company_id.website:
+                body += f"\n{self.company_id.website}"
+                
+            body += f"\n--------------------------------"
+            
+            if self.partner_id and self.partner_id.name:
+                body += f"\nBetjent af {self.partner_id.name}"
+                
+            body += f"\n{self.name}\n\n{lines_text}"
+            body += f"--------\nTOTAL                kr {self.amount_total:.2f}\n"
+            
+            if self.payment_ids:
+                payment_method = self.payment_ids[0].payment_method_id.name
+                body += f"\n{payment_method}          {self.amount_total:.2f}"
+            else:
+                body += f"\nKontant          {self.amount_total:.2f}"
+                
+            body += f"\n\nBYTTEPENGE\n                     kr 0,00"
+            
+            if self.amount_tax > 0:
+                tax_base = self.amount_total - self.amount_tax
+                body += f"\n\nMoms    Beløb    Basis      I alt"
+                body += f"\n25%     {self.amount_tax:.2f}    {tax_base:.2f}    {self.amount_total:.2f}"
+            
+            if self.partner_id and self.partner_id.name:
+                body += f"\n\nKunde               {self.partner_id.name}"
+                
+            body += f"\n\nScan mig for at anmode om en faktura for dit køb."
+            
+            if self.company_id.website:
+                body += f"\n\nDu kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
+                
+            body += f"\nUnik kode: {self.pos_reference or self.name}"
+            body += f"\n\nPowered by Odoo"
+            body += f"\nOrdre {self.name}"
+            body += f"\n{self.date_order.strftime('%d-%m-%Y %H:%M:%S')}"
+            
+            _logger.info("Created Danish SMS receipt body")
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
@@ -307,8 +356,9 @@ class PosOrder(models.Model):
                 'message': _('SMS receipt sent successfully to %s') % phone_to_use,
                 'type': 'success',
             }
-        } 
-   def _render_custom_sms_receipt(self):
+        }
+
+    def _render_custom_sms_receipt(self):
         """Render SMS receipt using customizable template."""
         # Get the template for this company
         template = self.env['sms.receipt.template'].get_default_template(self.company_id.id)
@@ -366,13 +416,22 @@ class PosOrder(models.Model):
         # Total
         if template.show_total and template.total_template:
             payment_method = "Kontant"
+            payment_amount = self.amount_total
+            change_amount = 0.0
+            
             if self.payment_ids:
                 payment_method = self.payment_ids[0].payment_method_id.name
+                payment_amount = sum(payment.amount for payment in self.payment_ids)
+                # Calculate change (difference between payment amount and total)
+                change_amount = payment_amount - self.amount_total
+                # Ensure change is not negative (in case of underpayment)
+                change_amount = max(0.0, change_amount)
             
             total_section = template.total_template.format(
                 total=f"{self.amount_total:.2f}",
                 payment_method=payment_method,
-                amount=f"{self.amount_total:.2f}"
+                amount=f"{payment_amount:.2f}",
+                change=f"{change_amount:.2f}"
             )
             body_parts.append(total_section)
         
@@ -399,11 +458,25 @@ class PosOrder(models.Model):
             if self.company_id.website:
                 website_line = f"Du kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
             
+            # Generate ticket code if POS is configured to generate codes
+            ticket_code_line = ""
+            if hasattr(self, 'config_id') and self.config_id and hasattr(self.config_id, 'receipt_header') and self.config_id.receipt_header:
+                # Check if POS is configured to generate ticket codes
+                if hasattr(self.config_id, 'receipt_footer') and 'code' in (self.config_id.receipt_footer or '').lower():
+                    ticket_code_line = f"Ticket kode: {self.pos_reference or self.name}"
+                elif hasattr(self, 'access_token') and self.access_token:
+                    # Use access token if available
+                    ticket_code_line = f"Ticket kode: {self.access_token[:8].upper()}"
+                elif self.pos_reference and self.pos_reference != self.name:
+                    # Use POS reference if different from order name
+                    ticket_code_line = f"Ticket kode: {self.pos_reference}"
+            
             footer_section = template.footer_template.format(
                 website_line=website_line,
                 unique_code=self.pos_reference or self.name,
                 order_name=self.name,
-                order_datetime=self.date_order.strftime('%d-%m-%Y %H:%M:%S')
+                order_datetime=self.date_order.strftime('%d-%m-%Y %H:%M:%S'),
+                ticket_code_line=ticket_code_line
             )
             # Remove empty lines
             footer_section = '\n'.join(line for line in footer_section.split('\n') if line.strip())
