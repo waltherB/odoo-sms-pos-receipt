@@ -80,8 +80,7 @@ class PosOrder(models.Model):
             self.write({'phone_for_sms_receipt': phone_number})
 
         try:
-            # TEMPORARY: Skip template rendering and use simple hardcoded message
-            # This will test if basic SMS sending works
+            # Create a simple hardcoded message with actual data
             body = f"""Receipt for Order: {self.name}
 Date: {self.date_order.strftime('%d-%m-%Y %H:%M')}
 Company: {self.company_id.name}
@@ -89,8 +88,7 @@ Total: {self.amount_total:.2f} kr
 
 Thank you for your purchase!"""
             
-            _logger.info("Using hardcoded SMS body for testing")
-            _logger.info("SMS body: %s", body)
+            _logger.info("Created hardcoded SMS body: %s", body)
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
@@ -226,6 +224,8 @@ Thank you for your purchase!"""
     def _send_sms_message(self, phone, body):
         """Send SMS message using configured gateway."""
         try:
+            _logger.info("_send_sms_message called with body: %s", body[:100] + "..." if len(body) > 100 else body)
+            
             # Create SMS record and send it using the default gateway
             # Note: Gateway selection is handled by the SMS gateway module configuration
             sms_vals = {
@@ -234,7 +234,9 @@ Thank you for your purchase!"""
                 'state': 'outgoing',
             }
             
+            _logger.info("Creating SMS record with vals: %s", sms_vals)
             sms_record = self.env['sms.sms'].create(sms_vals)
+            _logger.info("SMS record created with body: %s", sms_record.body[:100] + "..." if len(sms_record.body) > 100 else sms_record.body)
             
             try:
                 sms_record._send()
