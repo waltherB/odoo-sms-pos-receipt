@@ -1,0 +1,42 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* odoo-sms-pos-receipt
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-30 12:00+0000\n"
+"PO-Revision-Date: 2025-07-30 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml:0
+msgid "Send SMS Receipt"
+msgstr "Send SMS Kvittering"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml:0
+msgid "Enter phone number (+1234567890)"
+msgstr "Indtast telefonnummer (+4512345678)"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "SMS receipt sent successfully to %s."
+msgstr "SMS kvittering sendt med succes til %s."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "Please enter a valid phone number to send the SMS receipt."
+msgstr "Indtast venligst et gyldigt telefonnummer for at sende SMS kvitteringen."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "The entered phone number format is not valid."
+msgstr "Det indtastede telefonnummer format er ikke gyldigt."
