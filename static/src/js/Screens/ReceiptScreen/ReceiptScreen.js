@@ -15,6 +15,24 @@ patch(ReceiptScreen.prototype, {
         this.notification = useService("notification");
         this.popup = useService("popup");
         this.orm = useService("orm");
+        
+        // Initialize SMS phone number safely
+        this.initializeSmsPhone();
+    },
+
+    initializeSmsPhone() {
+        // Initialize SMS phone number if not already set
+        if (!this.orderUiState.inputSmsPhone) {
+            const partner = this.currentOrder?.get_partner();
+            this.orderUiState.inputSmsPhone = (partner && (partner.mobile || partner.phone)) || "";
+        }
+        
+        // Initialize SMS states
+        if (this.orderUiState.smsSuccessful === undefined) {
+            this.orderUiState.isSmsSending = false;
+            this.orderUiState.smsSuccessful = null;
+            this.orderUiState.smsNotice = "";
+        }
     },
 
     get isSmsEnabled() {
@@ -27,17 +45,7 @@ patch(ReceiptScreen.prototype, {
         return (partner && (partner.mobile || partner.phone)) || "";
     },
 
-    get smsPhoneNumber() {
-        // Initialize if not set
-        if (!this.orderUiState.inputSmsPhone) {
-            this.orderUiState.inputSmsPhone = this.smsPhoneFromPartner;
-        }
-        return this.orderUiState.inputSmsPhone || "";
-    },
 
-    set smsPhoneNumber(value) {
-        this.orderUiState.inputSmsPhone = value;
-    },
 
     async sendSmsReceipt() {
         // Safety checks
@@ -45,15 +53,11 @@ patch(ReceiptScreen.prototype, {
             return;
         }
 
+        // Ensure SMS phone is initialized
+        this.initializeSmsPhone();
+
         const order = this.currentOrder;
         const phone = this.orderUiState.inputSmsPhone;
-
-        // Initialize SMS states if not already done
-        if (this.orderUiState.smsSuccessful === undefined) {
-            this.orderUiState.isSmsSending = false;
-            this.orderUiState.smsSuccessful = null;
-            this.orderUiState.smsNotice = "";
-        }
 
         // Reset previous states
         this.orderUiState.smsSuccessful = null;

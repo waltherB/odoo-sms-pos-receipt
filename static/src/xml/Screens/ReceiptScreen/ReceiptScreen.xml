@@ -14,10 +14,10 @@
                     <span class="input-group-text">
                         <i class="fa fa-phone"/>
                     </span>
-                    <input type="tel" class="form-control" t-att-placeholder="_t('Enter phone number (+1234567890)')" t-model="smsPhoneNumber" t-att-aria-label="_t('Phone number for SMS receipt')"/>
+                    <input type="tel" class="form-control" t-att-placeholder="_t('Enter phone number (+1234567890)')" t-model="orderUiState.inputSmsPhone" t-att-aria-label="_t('Phone number for SMS receipt')"/>
                 </div>
 
-                <button class="btn btn-success w-100 py-2" t-on-click="sendSmsReceipt" t-att-disabled="!smsPhoneNumber">
+                <button class="btn btn-success w-100 py-2" t-on-click="sendSmsReceipt" t-att-disabled="!orderUiState.inputSmsPhone">
                     <i class="fa fa-paper-plane me-2" t-if="!orderUiState.isSmsSending"/>
                     <i class="fa fa-spinner fa-spin me-2" t-if="orderUiState.isSmsSending"/>
                     <t t-esc="_t('Send SMS Receipt')"/>
