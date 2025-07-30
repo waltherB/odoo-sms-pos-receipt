@@ -3,6 +3,7 @@
     'name': 'POS SMS Receipt',
     'version': '17.0.1.0.0',
     'category': 'Point of Sale',
+    "license": "AGPL-3",
     'summary': 'Send POS receipts via SMS with customizable templates.',
     'description': """
 POS SMS Receipt Module
@@ -18,8 +19,8 @@ Key Features:
 - SMS sending status tracking
 - Backend resend functionality
     """,
-    'author': 'Your Company',
-    'website': 'https://www.yourcompany.com',
+    'author': 'Walther Barnett',
+    'website': 'https://github.com/waltherB/odoo-sms-pos-receipt',
     'depends': [
         'point_of_sale',
         'sms',
@@ -31,7 +32,7 @@ Key Features:
     'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
-        'security/sms_receipt_template_security.csv',
+        'security/sms_receipt_template_access.xml',
         'data/sms_template_data.xml',
         'data/sms_receipt_template_data.xml',
         'data/setup_sms_accounts.xml',
@@ -49,6 +50,5 @@ Key Features:
     'installable': True,
     'application': False,
     'auto_install': False,
-    'license': 'LGPL-3',
     'post_init_hook': 'post_init_hook',
 }

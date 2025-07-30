@@ -198,12 +198,33 @@
             </field>
         </record>
         
+        <!-- SMS Receipt Template Search View -->
+        <record id="view_sms_receipt_template_search" model="ir.ui.view">
+            <field name="name">sms.receipt.template.search</field>
+            <field name="model">sms.receipt.template</field>
+            <field name="arch" type="xml">
+                <search string="SMS Receipt Templates">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <separator/>
+                    <filter string="Active" name="active" domain="[('active', '=', True)]" context="{'active_test': True}"/>
+                    <filter string="Inactive" name="inactive" domain="[('active', '=', False)]" context="{'active_test': False}"/>
+                    <filter string="All" name="all" domain="[]" context="{'active_test': False}"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Company" name="group_company" domain="[]" context="{'group_by': 'company_id'}"/>
+                        <filter string="Status" name="group_active" domain="[]" context="{'group_by': 'active'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
         <!-- SMS Receipt Template Tree View -->
         <record id="view_sms_receipt_template_tree" model="ir.ui.view">
             <field name="name">sms.receipt.template.tree</field>
             <field name="model">sms.receipt.template</field>
             <field name="arch" type="xml">
-                <tree string="SMS Receipt Templates">
+                <tree string="SMS Receipt Templates" decoration-muted="not active">
                     <field name="name"/>
                     <field name="company_id"/>
                     <field name="active"/>
@@ -216,6 +237,8 @@
             <field name="name">SMS Receipt Templates</field>
             <field name="res_model">sms.receipt.template</field>
             <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_sms_receipt_template_search"/>
+            <field name="context">{'search_default_all': 1, 'active_test': False}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Create your first SMS receipt template!
@@ -233,6 +256,8 @@
                 </ul>
                 <h4>Available Variables Include:</h4>
                 <p><code>{company_name}, {order_name}, {total}, {customer_name}, {product_name}, {qty}, {price}</code> and many more!</p>
+                <h4>💡 Tip:</h4>
+                <p>Use the filters above to show <strong>Active</strong>, <strong>Inactive</strong>, or <strong>All</strong> templates. Inactive templates appear grayed out.</p>
             </field>
         </record>
         
