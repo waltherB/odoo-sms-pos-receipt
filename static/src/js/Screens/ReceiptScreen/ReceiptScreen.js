@@ -11,28 +11,27 @@ patch(ReceiptScreen.prototype, {
     setup() {
         super.setup(...arguments);
         
+        // Always initialize services (we'll check config later)
+        this.notification = useService("notification");
+        this.popup = useService("popup");
+        this.orm = useService("orm");
+    },
 
-        
-        // Only initialize SMS services if SMS is enabled
-        if (this.pos.config.enable_sms_receipt) {
-            this.notification = useService("notification");
-            this.popup = useService("popup");
-            this.orm = useService("orm");
-            
-            // Initialize SMS phone number and states in orderUiState like email
-            // Note: this.currentOrder is already available from the parent class
-            const partner = this.currentOrder.get_partner();
-            this.orderUiState.inputSmsPhone = this.orderUiState.inputSmsPhone || 
-                (partner && (partner.mobile || partner.phone)) || "";
-            
-            // Initialize SMS states
-            this.orderUiState.isSmsSending = false;
-            this.orderUiState.smsSuccessful = null;
-            this.orderUiState.smsNotice = "";
-        }
+    get isSmsEnabled() {
+        return this.pos && this.pos.config && this.pos.config.enable_sms_receipt;
+    },
+
+    get smsPhoneFromPartner() {
+        if (!this.currentOrder) return "";
+        const partner = this.currentOrder.get_partner();
+        return (partner && (partner.mobile || partner.phone)) || "";
     },
 
     get smsPhoneNumber() {
+        // Initialize if not set
+        if (!this.orderUiState.inputSmsPhone) {
+            this.orderUiState.inputSmsPhone = this.smsPhoneFromPartner;
+        }
         return this.orderUiState.inputSmsPhone || "";
     },
 
@@ -41,8 +40,20 @@ patch(ReceiptScreen.prototype, {
     },
 
     async sendSmsReceipt() {
+        // Safety checks
+        if (!this.isSmsEnabled) {
+            return;
+        }
+
         const order = this.currentOrder;
         const phone = this.orderUiState.inputSmsPhone;
+
+        // Initialize SMS states if not already done
+        if (this.orderUiState.smsSuccessful === undefined) {
+            this.orderUiState.isSmsSending = false;
+            this.orderUiState.smsSuccessful = null;
+            this.orderUiState.smsNotice = "";
+        }
 
         // Reset previous states
         this.orderUiState.smsSuccessful = null;
