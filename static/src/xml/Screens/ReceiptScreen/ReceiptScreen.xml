@@ -7,20 +7,20 @@
             <div t-if="pos and pos.config and pos.config.enable_sms_receipt" class="sms-receipt-section my-3">
                 <h6 class="mb-3">
                     <i class="fa fa-comment me-2"/>
-                    <t t-esc="_t('Send SMS Receipt')"/>
+                    Send SMS Receipt
                 </h6>
 
                 <div class="input-group mb-2">
                     <span class="input-group-text">
                         <i class="fa fa-phone"/>
                     </span>
-                    <input type="tel" class="form-control" t-att-placeholder="_t('Enter phone number (+1234567890)')" t-model="orderUiState.inputSmsPhone" t-att-aria-label="_t('Phone number for SMS receipt')"/>
+                    <input type="tel" class="form-control" placeholder="Enter phone number (+1234567890)" t-model="orderUiState.inputSmsPhone" aria-label="Phone number for SMS receipt"/>
                 </div>
 
                 <button class="btn btn-success w-100 py-2" t-on-click="sendSmsReceipt" t-att-disabled="!orderUiState.inputSmsPhone">
                     <i class="fa fa-paper-plane me-2" t-if="!orderUiState.isSmsSending"/>
                     <i class="fa fa-spinner fa-spin me-2" t-if="orderUiState.isSmsSending"/>
-                    <t t-esc="_t('Send SMS Receipt')"/>
+                    Send SMS Receipt
                 </button>
 
                 <div class="notice mt-2" t-if="orderUiState.smsSuccessful !== null">
@@ -30,7 +30,7 @@
                 </div>
 
                 <small class="text-muted d-block mt-1">
-                    <t t-esc="_t('Enter phone number with country code (e.g., +1234567890)')"/>
+                    Enter phone number with country code (e.g., +1234567890)
                 </small>
             </div>
         </xpath>
