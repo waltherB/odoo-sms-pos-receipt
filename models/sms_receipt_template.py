@@ -145,9 +145,7 @@ BYTTEPENGE
     
     footer_template = fields.Text(
         string="Footer Template",
-        default="""Scan mig for at anmode om en faktura for dit køb.
-
-{website_line}
+        default="""{website_line}
 Unik kode: {unique_code}
 
 Powered by Odoo

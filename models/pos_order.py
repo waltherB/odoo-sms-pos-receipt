@@ -121,10 +121,8 @@ class PosOrder(models.Model):
             if self.partner_id and self.partner_id.name:
                 body += f"\n\nKunde               {self.partner_id.name}"
                 
-            body += f"\n\nScan mig for at anmode om en faktura for dit køb."
-            
             if self.company_id.website:
-                body += f"\n\nDu kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
+                body += f"\n\nBesøg {self.company_id.website} for mere information"
                 
             body += f"\nUnik kode: {self.pos_reference or self.name}"
             body += f"\n\nPowered by Odoo"
@@ -460,7 +458,7 @@ class PosOrder(models.Model):
         if template.show_footer and template.footer_template:
             website_line = ""
             if self.company_id.website:
-                website_line = f"Du kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
+                website_line = f"Besøg {self.company_id.website} for mere information"
             
             footer_section = template.footer_template.format(
                 website_line=website_line,
