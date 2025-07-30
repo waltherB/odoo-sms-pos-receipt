@@ -29,6 +29,7 @@
                         <group>
                             <group>
                                 <field name="company_id"/>
+                                <field name="language"/>
                                 <field name="active"/>
                             </group>
                         </group>
@@ -205,13 +206,19 @@
             <field name="arch" type="xml">
                 <search string="SMS Receipt Templates">
                     <field name="name"/>
+                    <field name="language"/>
                     <field name="company_id"/>
                     <separator/>
                     <filter string="Active" name="active" domain="[('active', '=', True)]" context="{'active_test': True}"/>
                     <filter string="Inactive" name="inactive" domain="[('active', '=', False)]" context="{'active_test': False}"/>
                     <filter string="All" name="all" domain="[]" context="{'active_test': False}"/>
                     <separator/>
+                    <filter string="Danish" name="danish" domain="[('language', '=', 'da_DK')]"/>
+                    <filter string="English" name="english" domain="[('language', '=', 'en_US')]"/>
+                    <filter string="German" name="german" domain="[('language', '=', 'de_DE')]"/>
+                    <separator/>
                     <group expand="0" string="Group By">
+                        <filter string="Language" name="group_language" domain="[]" context="{'group_by': 'language'}"/>
                         <filter string="Company" name="group_company" domain="[]" context="{'group_by': 'company_id'}"/>
                         <filter string="Status" name="group_active" domain="[]" context="{'group_by': 'active'}"/>
                     </group>
@@ -226,6 +233,7 @@
             <field name="arch" type="xml">
                 <tree string="SMS Receipt Templates" decoration-muted="not active">
                     <field name="name"/>
+                    <field name="language"/>
                     <field name="company_id"/>
                     <field name="active"/>
                 </tree>

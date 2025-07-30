@@ -360,8 +360,12 @@ class PosOrder(models.Model):
 
     def _render_custom_sms_receipt(self):
         """Render SMS receipt using customizable template."""
-        # Get the template for this company
-        template = self.env['sms.receipt.template'].get_default_template(self.company_id.id)
+        # Get the template for this company and user's language
+        user_lang = self.env.context.get('lang', 'da_DK')
+        template = self.env['sms.receipt.template'].get_default_template(
+            company_id=self.company_id.id,
+            language=user_lang
+        )
         
         body_parts = []
         
