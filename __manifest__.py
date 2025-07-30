@@ -9,15 +9,23 @@
 POS SMS Receipt Module
 
 This module extends the Point of Sale interface to allow cashiers
-to send receipts to customers via SMS, in addition to email or printing.
+to send receipts to customers via SMS, providing a modern alternative
+to email or printing receipts.
 
 Key Features:
 - SMS receipt option on POS receipt screen
 - Phone number input with customer auto-fill
 - Configurable SMS gateway selection per POS
-- Customizable SMS templates
-- SMS sending status tracking
+- Customizable multi-language SMS templates
+- Template management with live preview
+- Multi-language support (English, Danish, German)
+- Dynamic change calculation for cash payments
+- SMS sending status tracking and error handling
 - Backend resend functionality
+- Offline POS support
+- Professional receipt formatting
+- Template variable system for dynamic content
+- Permission-based access control
     """,
     'author': 'Walther Barnett',
     'website': 'https://github.com/waltherB/odoo-sms-pos-receipt',

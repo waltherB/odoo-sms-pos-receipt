@@ -1,13 +1,13 @@
 # POS SMS Receipt Module for Odoo 17
 
-Send POS receipts via SMS with customizable Danish-formatted templates and dynamic change calculation.
+Send POS receipts via SMS with customizable templates and multi-language support.
 
 ## 📱 Features
 
 ### Core Functionality
 - **SMS Receipt Sending** - Send receipts directly from POS interface
 - **Customizable Templates** - Create and manage SMS receipt templates
-- **Danish Formatting** - Professional Danish receipt formatting with proper currency and tax display
+- **Multi-Language Support** - Professional receipt formatting with localization support
 - **Dynamic Change Calculation** - Automatic calculation of change amount for cash payments
 - **Multi-Gateway Support** - Compatible with various SMS gateways (GatewayAPI, etc.)
 - **POS Integration** - Seamless integration with Odoo 17 Point of Sale
@@ -17,10 +17,11 @@ Send POS receipts via SMS with customizable Danish-formatted templates and dynam
 - **Modular Sections** - Enable/disable company info, items, totals, tax, customer info, footer
 - **Live Preview** - See exactly how your SMS will look before sending
 - **Multi-Company Support** - Different templates per company
+- **Multi-Language Templates** - Support for multiple languages with proper localization
 - **Active/Inactive Management** - Easy template activation/deactivation with visual indicators
 
 ### Advanced Features
-- **Ticket Code Integration** - Supports POS "Generate a code on ticket" feature
+- **Translation Support** - Full translation support for user interface and messages
 - **Error Handling** - Robust error handling for production environments
 - **Offline Support** - Works with offline POS systems
 - **Permission Management** - Proper access control for different user groups
@@ -112,38 +113,38 @@ Use these variables in your templates:
 {vat_line}
 --------------------------------
 {served_by_line}
-Ordre: {order_name}
-Dato: {order_date}
+Order: {order_name}
+Date: {order_date}
 
-{qty}x {product_name} = {price} kr
+{qty}x {product_name} = {price}
 
 --------
-TOTAL                kr {total}
+TOTAL                {total}
 
 {payment_method}          {amount}
 
-BYTTEPENGE
-                     kr {change}
+CHANGE
+                     {change}
 
-Moms    Beløb    Basis      I alt
-25%     {tax_amount} kr  {tax_base} kr  {total} kr
+Tax     Amount   Base       Total
+25%     {tax_amount}  {tax_base}  {total}
 
-Kunde: {customer_name}
+Customer: {customer_name}
 
-Tak for dit køb!
+Thank you for your purchase!
 {website_line}
-Unik kode: {unique_code}
+Unique code: {unique_code}
 ```
 
 **Minimal Template:**
 ```
 {company_name}
-Ordre: {order_name} - {order_date}
-{qty}x {product_name} {price}kr
-Total: {total} kr ({payment_method})
-Change: {change} kr
-Kunde: {customer_name}
-Tak for dit køb! {website_line}
+Order: {order_name} - {order_date}
+{qty}x {product_name} {price}
+Total: {total} ({payment_method})
+Change: {change}
+Customer: {customer_name}
+Thank you for your purchase! {website_line}
 Ref: {unique_code}
 ```
 
@@ -245,7 +246,7 @@ The module includes robust error handling for:
 
 ## 📄 License
 
-This module is licensed under LGPL-2.
+This module is licensed under AGPL-3. See the LICENSE file for full license text.
 
 ## 🤝 Support
 
@@ -256,9 +257,10 @@ For support and bug reports, please contact the module maintainer or create an i
 ### Version 17.0.1.0.0
 - Initial release for Odoo 17
 - Complete SMS receipt functionality
-- Danish formatting support
+- Multi-language support (English, Danish, German)
 - Dynamic change calculation
 - Customizable template system
 - POS integration
 - Multi-gateway support
+- Translation support for user interface
 - Production-ready error handling
