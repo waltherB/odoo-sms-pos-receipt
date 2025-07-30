@@ -31,11 +31,14 @@ Key Features:
     'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
+        'security/sms_receipt_template_security.csv',
         'data/sms_template_data.xml',
+        'data/sms_receipt_template_data.xml',
         'data/setup_sms_accounts.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
         'views/sms_template_views.xml',
+        'views/sms_receipt_template_views.xml',
     ],
     'assets': {
         'point_of_sale._assets_pos': [
@@ -47,4 +50,5 @@ Key Features:
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }
