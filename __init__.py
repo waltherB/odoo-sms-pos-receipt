@@ -37,7 +37,7 @@ def post_init_hook(env):
                     'show_customer': True,
                     'customer_template': 'Kunde: {customer_name}',
                     'show_footer': True,
-                    'footer_template': 'Tak for dit køb!\n\n{website_line}\n\n{ticket_code_line}\n\nUnik kode: {unique_code}\nOrdre: {order_name}\n{order_datetime}'
+                    'footer_template': 'Tak for dit køb!\n\n{website_line}\n\nUnik kode: {unique_code}\nOrdre: {order_name}\n{order_datetime}'
                 }
             ])
 from . import controllers

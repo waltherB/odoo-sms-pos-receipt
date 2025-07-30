@@ -462,25 +462,11 @@ class PosOrder(models.Model):
             if self.company_id.website:
                 website_line = f"Du kan gå til {self.company_id.website} og brug koden nedenfor til at anmode om en faktura online"
             
-            # Generate ticket code if POS is configured to generate codes
-            ticket_code_line = ""
-            if hasattr(self, 'config_id') and self.config_id and hasattr(self.config_id, 'receipt_header') and self.config_id.receipt_header:
-                # Check if POS is configured to generate ticket codes
-                if hasattr(self.config_id, 'receipt_footer') and 'code' in (self.config_id.receipt_footer or '').lower():
-                    ticket_code_line = f"Ticket kode: {self.pos_reference or self.name}"
-                elif hasattr(self, 'access_token') and self.access_token:
-                    # Use access token if available
-                    ticket_code_line = f"Ticket kode: {self.access_token[:8].upper()}"
-                elif self.pos_reference and self.pos_reference != self.name:
-                    # Use POS reference if different from order name
-                    ticket_code_line = f"Ticket kode: {self.pos_reference}"
-            
             footer_section = template.footer_template.format(
                 website_line=website_line,
                 unique_code=self.pos_reference or self.name,
                 order_name=self.name,
-                order_datetime=self.date_order.strftime('%d-%m-%Y %H:%M:%S'),
-                ticket_code_line=ticket_code_line
+                order_datetime=self.date_order.strftime('%d-%m-%Y %H:%M:%S')
             )
             # Remove empty lines
             footer_section = '\n'.join(line for line in footer_section.split('\n') if line.strip())

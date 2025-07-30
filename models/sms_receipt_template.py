@@ -153,7 +153,7 @@ Unik kode: {unique_code}
 Powered by Odoo
 Ordre {order_name}
 {order_datetime}""",
-        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}, {ticket_code_line}",
+        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}",
         translate=True
     )
     
@@ -240,8 +240,7 @@ Ordre {order_name}
                     website_line="Du kan gå til https://company.dk og brug koden nedenfor",
                     unique_code="Shop/001",
                     order_name="Shop/001",
-                    order_datetime="29-07-2025 08:30:15",
-                    ticket_code_line="Ticket kode: ABC123 (hvis aktiveret i POS)"
+                    order_datetime="29-07-2025 08:30:15"
                 )
             
             record.preview_text = preview
@@ -346,7 +345,7 @@ Ordre {order_name}
                 'show_customer': True,
                 'customer_template': f'{lang_data["customer_prefix"]} {{customer_name}}',
                 'show_footer': True,
-                'footer_template': f'{lang_data["thank_you"]}\n\n{{website_line}}\n\n{{ticket_code_line}}\n\n{lang_data["unique_code"]} {{unique_code}}\n{lang_data["order_prefix"]} {{order_name}}\n{{order_datetime}}'
+                'footer_template': f'{lang_data["thank_you"]}\n\n{{website_line}}\n\n{lang_data["unique_code"]} {{unique_code}}\n{lang_data["order_prefix"]} {{order_name}}\n{{order_datetime}}'
             })
             templates += complete_template
             
@@ -368,7 +367,7 @@ Ordre {order_name}
                 'show_customer': True,
                 'customer_template': f'{lang_data["customer_prefix"]} {{customer_name}}',
                 'show_footer': True,
-                'footer_template': f'{lang_data["thank_you"]} {{website_line}}\n{{ticket_code_line}}\nRef: {{unique_code}}'
+                'footer_template': f'{lang_data["thank_you"]} {{website_line}}\nRef: {{unique_code}}'
             })
             templates += minimal_template
         

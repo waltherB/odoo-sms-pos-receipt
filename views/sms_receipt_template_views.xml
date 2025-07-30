@@ -160,7 +160,7 @@
                                     <field name="footer_template" 
                                            widget="text" 
                                            invisible="not show_footer"
-                                           placeholder="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}, {ticket_code_line}"/>
+                                           placeholder="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}"/>
                                 </group>
                                 <div invisible="not show_footer" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
                                     <h5 style="color: #495057; margin-top: 0;">Available Variables for Footer:</h5>
@@ -169,12 +169,10 @@
                                         <strong>{unique_code}</strong> - Unique order identifier<br/>
                                         <strong>{order_name}</strong> - Order reference number<br/>
                                         <strong>{order_datetime}</strong> - Full order date and time<br/>
-                                        <strong>{ticket_code_line}</strong> - POS ticket code (if enabled in POS configuration)
                                     </p>
                                     <p><strong>Example:</strong><br/>
                                     Thank you for your purchase!<br/>
                                     {website_line}<br/>
-                                    {ticket_code_line}<br/>
                                     Ref: {unique_code}</p>
                                 </div>
                             </page>
