@@ -16,19 +16,59 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: odoo-sms-pos-receipt
-#: code:addons/odoo-sms-pos-receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml:0
-msgid "Send SMS Receipt"
-msgstr "Send SMS Receipt"
+#: code:addons/odoo-sms-pos-receipt/models/sms_receipt_template.py:0
+msgid "Preview Updated"
+msgstr "Preview Updated"
 
 #. module: odoo-sms-pos-receipt
-#: code:addons/odoo-sms-pos-receipt/static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml:0
-msgid "Enter phone number (+1234567890)"
-msgstr "Enter phone number (+1234567890)"
+#: code:addons/odoo-sms-pos-receipt/models/sms_receipt_template.py:0
+msgid "The SMS preview has been refreshed with current template settings."
+msgstr "The SMS preview has been refreshed with current template settings."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/sms_receipt_template.py:0
+msgid "Default SMS Receipt"
+msgstr "Default SMS Receipt"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "No phone number specified for the SMS receipt."
+msgstr "No phone number specified for the SMS receipt."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "Invalid phone number format: %s"
+msgstr "Invalid phone number format: %s"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "Receipt for Order: %(order_name)s\\nTotal: %(total)s %(currency)s\\nThank you for your purchase!"
+msgstr "Receipt for Order: %(order_name)s\\nTotal: %(total)s %(currency)s\\nThank you for your purchase!"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "No phone number found on the order or linked customer."
+msgstr "No phone number found on the order or linked customer."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "Failed to send SMS: %s"
+msgstr "Failed to send SMS: %s"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "SMS Sent"
+msgstr "SMS Sent"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/models/pos_order.py:0
+msgid "SMS receipt sent successfully to %s"
+msgstr "SMS receipt sent successfully to %s"
 
 #. module: odoo-sms-pos-receipt
 #: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
-msgid "SMS receipt sent successfully to %s."
-msgstr "SMS receipt sent successfully to %s."
+msgid "Cannot send SMS receipt, current order not available."
+msgstr "Cannot send SMS receipt, current order not available."
 
 #. module: odoo-sms-pos-receipt
 #: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
@@ -39,3 +79,38 @@ msgstr "Please enter a valid phone number to send the SMS receipt."
 #: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
 msgid "The entered phone number format is not valid."
 msgstr "The entered phone number format is not valid."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "Cannot send SMS while offline. Please connect to internet and try again."
+msgstr "Cannot send SMS while offline. Please connect to internet and try again."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "Network error. Please check your connection and try again."
+msgstr "Network error. Please check your connection and try again."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "Failed to save order to backend for SMS sending."
+msgstr "Failed to save order to backend for SMS sending."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "SMS receipt sent successfully to %s."
+msgstr "SMS receipt sent successfully to %s."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "SMS Sending Failed: %s"
+msgstr "SMS Sending Failed: %s"
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "An unknown error occurred while sending the SMS."
+msgstr "An unknown error occurred while sending the SMS."
+
+#. module: odoo-sms-pos-receipt
+#: code:addons/odoo-sms-pos-receipt/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+msgid "Could not connect to the server or an unexpected error occurred."
+msgstr "Could not connect to the server or an unexpected error occurred."
