@@ -102,7 +102,6 @@ Use these variables in your templates:
 
 **Footer Variables:**
 - `{unique_code}` - Unique order identifier
-- `{ticket_code_line}` - POS ticket code (if enabled)
 
 #### Template Examples
 
@@ -133,7 +132,6 @@ Kunde: {customer_name}
 
 Tak for dit køb!
 {website_line}
-{ticket_code_line}
 Unik kode: {unique_code}
 ```
 
@@ -146,7 +144,6 @@ Total: {total} kr ({payment_method})
 Change: {change} kr
 Kunde: {customer_name}
 Tak for dit køb! {website_line}
-{ticket_code_line}
 Ref: {unique_code}
 ```
 

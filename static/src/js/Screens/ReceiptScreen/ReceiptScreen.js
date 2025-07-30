@@ -11,36 +11,51 @@ patch(ReceiptScreen.prototype, {
     setup() {
         super.setup(...arguments);
         
-
+        // Always initialize services (we'll check config later)
+        this.notification = useService("notification");
+        this.popup = useService("popup");
+        this.orm = useService("orm");
         
-        // Only initialize SMS services if SMS is enabled
-        if (this.pos.config.enable_sms_receipt) {
-            this.notification = useService("notification");
-            this.popup = useService("popup");
-            this.orm = useService("orm");
-            
-            // Initialize SMS phone number and states in orderUiState like email
-            // Note: this.currentOrder is already available from the parent class
-            const partner = this.currentOrder.get_partner();
-            this.orderUiState.inputSmsPhone = this.orderUiState.inputSmsPhone || 
-                (partner && (partner.mobile || partner.phone)) || "";
-            
-            // Initialize SMS states
+        // Initialize SMS phone number safely
+        this.initializeSmsPhone();
+    },
+
+    initializeSmsPhone() {
+        // Initialize SMS phone number if not already set
+        if (!this.orderUiState.inputSmsPhone) {
+            const partner = this.currentOrder?.get_partner();
+            this.orderUiState.inputSmsPhone = (partner && (partner.mobile || partner.phone)) || "";
+        }
+        
+        // Initialize SMS states
+        if (this.orderUiState.smsSuccessful === undefined) {
             this.orderUiState.isSmsSending = false;
             this.orderUiState.smsSuccessful = null;
             this.orderUiState.smsNotice = "";
         }
     },
 
-    get smsPhoneNumber() {
-        return this.orderUiState.inputSmsPhone || "";
+    get isSmsEnabled() {
+        return this.pos && this.pos.config && this.pos.config.enable_sms_receipt;
     },
 
-    set smsPhoneNumber(value) {
-        this.orderUiState.inputSmsPhone = value;
+    get smsPhoneFromPartner() {
+        if (!this.currentOrder) return "";
+        const partner = this.currentOrder.get_partner();
+        return (partner && (partner.mobile || partner.phone)) || "";
     },
+
+
 
     async sendSmsReceipt() {
+        // Safety checks
+        if (!this.isSmsEnabled) {
+            return;
+        }
+
+        // Ensure SMS phone is initialized
+        this.initializeSmsPhone();
+
         const order = this.currentOrder;
         const phone = this.orderUiState.inputSmsPhone;
 

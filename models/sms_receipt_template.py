@@ -10,7 +10,8 @@ class SmsReceiptTemplate(models.Model):
     name = fields.Char(
         string="Template Name",
         required=True,
-        default="Default SMS Receipt"
+        default="Default SMS Receipt",
+        translate=True
     )
     
     company_id = fields.Many2one(
@@ -18,6 +19,23 @@ class SmsReceiptTemplate(models.Model):
         string="Company",
         default=lambda self: self.env.company,
         required=True
+    )
+    
+    language = fields.Selection(
+        selection=[
+            ('da_DK', 'Danish'),
+            ('en_US', 'English'),
+            ('de_DE', 'German'),
+            ('fr_FR', 'French'),
+            ('es_ES', 'Spanish'),
+            ('nl_NL', 'Dutch'),
+            ('sv_SE', 'Swedish'),
+            ('no_NO', 'Norwegian'),
+        ],
+        string="Language",
+        default='da_DK',
+        required=True,
+        help="Language for this SMS template"
     )
     
     active = fields.Boolean(
@@ -38,7 +56,8 @@ class SmsReceiptTemplate(models.Model):
 {vat_line}
 {email_line}
 {website_line}""",
-        help="Available variables: {company_name}, {phone_line}, {vat_line}, {email_line}, {website_line}"
+        help="Available variables: {company_name}, {phone_line}, {vat_line}, {email_line}, {website_line}",
+        translate=True
     )
     
     show_separator = fields.Boolean(
@@ -60,7 +79,8 @@ class SmsReceiptTemplate(models.Model):
         string="Order Info Template",
         default="""{served_by_line}
 {order_name}""",
-        help="Available variables: {served_by_line}, {order_name}, {order_date}"
+        help="Available variables: {served_by_line}, {order_name}, {order_date}",
+        translate=True
     )
     
     show_items = fields.Boolean(
@@ -71,7 +91,8 @@ class SmsReceiptTemplate(models.Model):
     item_line_template = fields.Char(
         string="Item Line Template",
         default="- {product_name} x{qty} = {price} kr",
-        help="Available variables: {product_name}, {qty}, {price}"
+        help="Available variables: {product_name}, {qty}, {price}",
+        translate=True
     )
     
     show_total = fields.Boolean(
@@ -88,7 +109,8 @@ TOTAL                kr {total}
 
 BYTTEPENGE
                      kr {change}""",
-        help="Available variables: {total}, {payment_method}, {amount}, {change}"
+        help="Available variables: {total}, {payment_method}, {amount}, {change}",
+        translate=True
     )
     
     show_tax = fields.Boolean(
@@ -100,7 +122,8 @@ BYTTEPENGE
         string="Tax Section Template",
         default="""Moms    Beløb    Basis      I alt
 25%     {tax_amount}    {tax_base}    {total}""",
-        help="Available variables: {tax_amount}, {tax_base}, {total}"
+        help="Available variables: {tax_amount}, {tax_base}, {total}",
+        translate=True
     )
     
     show_customer = fields.Boolean(
@@ -111,7 +134,8 @@ BYTTEPENGE
     customer_template = fields.Char(
         string="Customer Template",
         default="Kunde               {customer_name}",
-        help="Available variables: {customer_name}"
+        help="Available variables: {customer_name}",
+        translate=True
     )
     
     show_footer = fields.Boolean(
@@ -121,15 +145,14 @@ BYTTEPENGE
     
     footer_template = fields.Text(
         string="Footer Template",
-        default="""Scan mig for at anmode om en faktura for dit køb.
-
-{website_line}
+        default="""{website_line}
 Unik kode: {unique_code}
 
 Powered by Odoo
 Ordre {order_name}
 {order_datetime}""",
-        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}, {ticket_code_line}"
+        help="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}",
+        translate=True
     )
     
     # Preview functionality
@@ -215,8 +238,7 @@ Ordre {order_name}
                     website_line="Du kan gå til https://company.dk og brug koden nedenfor",
                     unique_code="Shop/001",
                     order_name="Shop/001",
-                    order_datetime="29-07-2025 08:30:15",
-                    ticket_code_line="Ticket kode: ABC123 (hvis aktiveret i POS)"
+                    order_datetime="29-07-2025 08:30:15"
                 )
             
             record.preview_text = preview
@@ -244,69 +266,143 @@ Ordre {order_name}
     
     @api.model
     def create_default_templates(self):
-        """Create default SMS receipt templates."""
-        # Check if templates already exist
-        existing = self.search([('name', 'in', ['Complete SMS Receipt Template', 'Minimal SMS Receipt'])])
-        if existing:
-            return existing
+        """Create default SMS receipt templates for different languages."""
+        templates = self.env['sms.receipt.template']
         
-        # Create complete template
-        complete_template = self.create({
-            'name': 'Complete SMS Receipt Template',
-            'active': True,
-            'show_company_info': True,
-            'company_info_template': '{company_name}\n{phone_line}\n{vat_line}\n{email_line}\n{website_line}',
-            'show_separator': True,
-            'separator_line': '--------------------------------',
-            'show_order_info': True,
-            'order_info_template': '{served_by_line}\nOrdre: {order_name}\nDato: {order_date}',
-            'show_items': True,
-            'item_line_template': '{qty}x {product_name} = {price} kr',
-            'show_total': True,
-            'total_template': '--------\nTOTAL                kr {total}\n\n{payment_method}          {amount}\n\nBYTTEPENGE\n                     kr {change}',
-            'show_tax': True,
-            'tax_template': 'Moms    Beløb    Basis      I alt\n25%     {tax_amount} kr  {tax_base} kr  {total} kr',
-            'show_customer': True,
-            'customer_template': 'Kunde: {customer_name}',
-            'show_footer': True,
-            'footer_template': 'Tak for dit køb!\n\n{website_line}\n\n{ticket_code_line}\n\nUnik kode: {unique_code}\nOrdre: {order_name}\n{order_datetime}'
-        })
+        # Define templates for different languages
+        language_templates = {
+            'da_DK': {
+                'complete_name': 'Komplet SMS Kvittering',
+                'minimal_name': 'Minimal SMS Kvittering',
+                'order_prefix': 'Ordre:',
+                'date_prefix': 'Dato:',
+                'customer_prefix': 'Kunde:',
+                'total_label': 'TOTAL',
+                'change_label': 'BYTTEPENGE',
+                'tax_header': 'Moms    Beløb    Basis      I alt',
+                'thank_you': 'Tak for dit køb!',
+                'unique_code': 'Unik kode:',
+                'currency': 'kr'
+            },
+            'en_US': {
+                'complete_name': 'Complete SMS Receipt',
+                'minimal_name': 'Minimal SMS Receipt',
+                'order_prefix': 'Order:',
+                'date_prefix': 'Date:',
+                'customer_prefix': 'Customer:',
+                'total_label': 'TOTAL',
+                'change_label': 'CHANGE',
+                'tax_header': 'Tax     Amount   Base       Total',
+                'thank_you': 'Thank you for your purchase!',
+                'unique_code': 'Unique code:',
+                'currency': '$'
+            },
+            'de_DE': {
+                'complete_name': 'Vollständige SMS-Quittung',
+                'minimal_name': 'Minimale SMS-Quittung',
+                'order_prefix': 'Bestellung:',
+                'date_prefix': 'Datum:',
+                'customer_prefix': 'Kunde:',
+                'total_label': 'GESAMT',
+                'change_label': 'WECHSELGELD',
+                'tax_header': 'MwSt    Betrag   Basis      Gesamt',
+                'thank_you': 'Vielen Dank für Ihren Einkauf!',
+                'unique_code': 'Eindeutiger Code:',
+                'currency': '€'
+            }
+        }
         
-        # Create minimal template
-        minimal_template = self.create({
-            'name': 'Minimal SMS Receipt',
-            'active': True,
-            'show_company_info': True,
-            'company_info_template': '{company_name}',
-            'show_separator': False,
-            'show_order_info': True,
-            'order_info_template': 'Ordre: {order_name} - {order_date}',
-            'show_items': True,
-            'item_line_template': '{qty}x {product_name} {price}kr',
-            'show_total': True,
-            'total_template': 'Total: {total} kr ({payment_method})',
-            'show_tax': False,
-            'show_customer': True,
-            'customer_template': 'Kunde: {customer_name}',
-            'show_footer': True,
-            'footer_template': 'Tak for dit køb! {website_line}\n{ticket_code_line}\nRef: {unique_code}'
-        })
+        # Create templates for each language
+        for lang_code, lang_data in language_templates.items():
+            # Check if templates already exist for this language
+            existing = self.search([
+                ('language', '=', lang_code),
+                ('name', 'in', [lang_data['complete_name'], lang_data['minimal_name']])
+            ])
+            if existing:
+                templates += existing
+                continue
+                
+            # Create complete template
+            complete_template = self.create({
+                'name': lang_data['complete_name'],
+                'language': lang_code,
+                'active': True,
+                'show_company_info': True,
+                'company_info_template': '{company_name}\n{phone_line}\n{vat_line}\n{email_line}\n{website_line}',
+                'show_separator': True,
+                'separator_line': '--------------------------------',
+                'show_order_info': True,
+                'order_info_template': f'{{served_by_line}}\n{lang_data["order_prefix"]} {{order_name}}\n{lang_data["date_prefix"]} {{order_date}}',
+                'show_items': True,
+                'item_line_template': f'{{qty}}x {{product_name}} = {{price}} {lang_data["currency"]}',
+                'show_total': True,
+                'total_template': f'--------\n{lang_data["total_label"]}                {lang_data["currency"]} {{total}}\n\n{{payment_method}}          {{amount}}\n\n{lang_data["change_label"]}\n                     {lang_data["currency"]} {{change}}',
+                'show_tax': True,
+                'tax_template': f'{lang_data["tax_header"]}\n25%     {{tax_amount}} {lang_data["currency"]}  {{tax_base}} {lang_data["currency"]}  {{total}} {lang_data["currency"]}',
+                'show_customer': True,
+                'customer_template': f'{lang_data["customer_prefix"]} {{customer_name}}',
+                'show_footer': True,
+                'footer_template': f'{lang_data["thank_you"]}\n\n{{website_line}}\n\n{lang_data["unique_code"]} {{unique_code}}\n{lang_data["order_prefix"]} {{order_name}}\n{{order_datetime}}'
+            })
+            templates += complete_template
+            
+            # Create minimal template
+            minimal_template = self.create({
+                'name': lang_data['minimal_name'],
+                'language': lang_code,
+                'active': True,
+                'show_company_info': True,
+                'company_info_template': '{company_name}',
+                'show_separator': False,
+                'show_order_info': True,
+                'order_info_template': f'{lang_data["order_prefix"]} {{order_name}} - {{order_date}}',
+                'show_items': True,
+                'item_line_template': f'{{qty}}x {{product_name}} {{price}}{lang_data["currency"]}',
+                'show_total': True,
+                'total_template': f'Total: {{total}} {lang_data["currency"]} ({{payment_method}})\n{lang_data["change_label"]}: {{change}} {lang_data["currency"]}',
+                'show_tax': False,
+                'show_customer': True,
+                'customer_template': f'{lang_data["customer_prefix"]} {{customer_name}}',
+                'show_footer': True,
+                'footer_template': f'{lang_data["thank_you"]} {{website_line}}\nRef: {{unique_code}}'
+            })
+            templates += minimal_template
         
-        return complete_template + minimal_template
+        return templates
 
     @api.model
-    def get_default_template(self, company_id=None):
-        """Get the default SMS receipt template for a company."""
+    def get_default_template(self, company_id=None, language=None):
+        """Get the default SMS receipt template for a company and language."""
         if not company_id:
             company_id = self.env.company.id
+        
+        if not language:
+            language = self.env.context.get('lang', 'da_DK')
             
+        # First try to find template for specific company and language
         template = self.search([
             ('company_id', '=', company_id),
+            ('language', '=', language),
             ('active', '=', True)
         ], limit=1)
         
         if not template:
-            # Try to find any active template for any company
+            # Try to find template for company with any language
+            template = self.search([
+                ('company_id', '=', company_id),
+                ('active', '=', True)
+            ], limit=1)
+            
+        if not template:
+            # Try to find template for specific language with any company
+            template = self.search([
+                ('language', '=', language),
+                ('active', '=', True)
+            ], limit=1)
+            
+        if not template:
+            # Try to find any active template
             template = self.search([('active', '=', True)], limit=1)
             
         if not template:
@@ -317,8 +413,9 @@ Ordre {order_name}
         if not template:
             # Last resort: create a simple template
             template = self.create({
-                'name': 'Default SMS Receipt',
-                'company_id': company_id
+                'name': _('Default SMS Receipt'),
+                'company_id': company_id,
+                'language': language
             })
         
         return template

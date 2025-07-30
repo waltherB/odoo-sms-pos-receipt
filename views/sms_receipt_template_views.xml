@@ -13,260 +13,261 @@
                                 <field name="name" placeholder="Template Name"/>
                             </h1>
                         </div>
-                        
+
                         <div class="oe_edit_only">
                             <div style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; margin: 10px 0; border-radius: 4px;">
                                 <h4 style="color: #0066cc; margin-top: 0;">📱 SMS Receipt Template Guide</h4>
-                                <p><strong>Create customizable SMS receipts for your POS orders!</strong></p>
+                                <p>
+                                    <strong>Create customizable SMS receipts for your POS orders!</strong>
+                                </p>
                                 <p>• Use <strong>{variable_name}</strong> format to insert dynamic content<br/>
                                 • Each section can be enabled/disabled independently<br/>
                                 • Variables are automatically replaced with real order data<br/>
                                 • Preview your template before saving<br/>
                                 • SMS length limit: ~160 characters per message (longer messages split automatically)</p>
-                            </div>
-                        </div>
-                        
-                        <group>
-                            <group>
-                                <field name="company_id"/>
-                                <field name="active"/>
-                            </group>
-                        </group>
-                        
-                        <notebook>
-                            <page string="Company Information" name="company_info">
-                                <group>
-                                    <field name="show_company_info"/>
-                                    <field name="company_info_template" 
-                                           widget="text" 
-                                           invisible="not show_company_info"
-                                           placeholder="Available variables: {company_name}, {phone_line}, {vat_line}, {email_line}, {website_line}"/>
-                                </group>
-                                <div invisible="not show_company_info" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Company Information:</h5>
-                                    <p>
-                                        <strong>{company_name}</strong> - Your company name<br/>
-                                        <strong>{phone_line}</strong> - Phone number (if set)<br/>
-                                        <strong>{vat_line}</strong> - VAT/CVR number (if set)<br/>
-                                        <strong>{email_line}</strong> - Company email (if set)<br/>
-                                        <strong>{website_line}</strong> - Company website (if set)
-                                    </p>
-                                    <p><strong>Example:</strong><br/>
+                </div>
+            </div>
+
+            <group>
+                <group>
+                    <field name="company_id"/>
+                    <field name="language"/>
+                    <field name="active"/>
+                </group>
+            </group>
+
+            <notebook>
+                <page string="Company Information" name="company_info">
+                    <group>
+                        <field name="show_company_info"/>
+                        <field name="company_info_template" widget="text" invisible="not show_company_info" placeholder="Available variables: {company_name}, {phone_line}, {vat_line}, {email_line}, {website_line}"/>
+                    </group>
+                    <div invisible="not show_company_info" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+                        <h5 style="color: #495057; margin-top: 0;">Available Variables for Company Information:</h5>
+                        <p>
+                            <strong>{company_name}</strong> - Your company name<br/>
+                        <strong>{phone_line}</strong> - Phone number (if set)<br/>
+                    <strong>{vat_line}</strong> - VAT/CVR number (if set)<br/>
+                <strong>{email_line}</strong> - Company email (if set)<br/>
+            <strong>{website_line}</strong> - Company website (if set)
+        </p>
+        <p>
+            <strong>Example:</strong>
+            <br/>
                                     {company_name}<br/>
                                     {phone_line}<br/>
                                     {vat_line}</p>
-                                </div>
-                            </page>
-                            
-                            <page string="Order Information" name="order_info">
-                                <group>
-                                    <field name="show_separator"/>
-                                    <field name="separator_line" invisible="not show_separator"/>
-                                    <field name="show_order_info"/>
-                                    <field name="order_info_template" 
-                                           widget="text" 
-                                           invisible="not show_order_info"
-                                           placeholder="Available variables: {served_by_line}, {order_name}, {order_date}"/>
-                                </group>
-                                <div invisible="not show_order_info" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Order Information:</h5>
-                                    <p>
-                                        <strong>{served_by_line}</strong> - Cashier/user who served (if available)<br/>
-                                        <strong>{order_name}</strong> - Order reference number<br/>
-                                        <strong>{order_date}</strong> - Order date and time
-                                    </p>
-                                    <p><strong>Example:</strong><br/>
+</div>
+</page>
+
+<page string="Order Information" name="order_info">
+<group>
+    <field name="show_separator"/>
+    <field name="separator_line" invisible="not show_separator"/>
+    <field name="show_order_info"/>
+    <field name="order_info_template" widget="text" invisible="not show_order_info" placeholder="Available variables: {served_by_line}, {order_name}, {order_date}"/>
+</group>
+<div invisible="not show_order_info" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+    <h5 style="color: #495057; margin-top: 0;">Available Variables for Order Information:</h5>
+    <p>
+        <strong>{served_by_line}</strong> - Cashier/user who served (if available)<br/>
+    <strong>{order_name}</strong> - Order reference number<br/>
+<strong>{order_date}</strong> - Order date and time
+</p>
+<p>
+<strong>Example:</strong>
+<br/>
                                     Order: {order_name}<br/>
                                     Date: {order_date}<br/>
                                     {served_by_line}</p>
-                                </div>
-                            </page>
-                            
-                            <page string="Items &amp; Total" name="items_total">
-                                <group>
-                                    <field name="show_items"/>
-                                    <field name="item_line_template" 
-                                           invisible="not show_items"
-                                           placeholder="Available variables: {product_name}, {qty}, {price}"/>
-                                    <field name="show_total"/>
-                                    <field name="total_template" 
-                                           widget="text" 
-                                           invisible="not show_total"
-                                           placeholder="Available variables: {total}, {payment_method}, {amount}, {change}"/>
-                                </group>
-                                <div invisible="not show_items" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Item Lines:</h5>
-                                    <p>
-                                        <strong>{product_name}</strong> - Product name<br/>
-                                        <strong>{qty}</strong> - Quantity purchased<br/>
-                                        <strong>{price}</strong> - Line total price
-                                    </p>
-                                    <p><strong>Example:</strong> {qty}x {product_name} {price}</p>
-                                    <p><em>Note: This template is repeated for each item in the order</em></p>
-                                </div>
-                                <div invisible="not show_total" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Total:</h5>
-                                    <p>
-                                        <strong>{total}</strong> - Order total amount<br/>
-                                        <strong>{payment_method}</strong> - Payment method used<br/>
-                                        <strong>{amount}</strong> - Payment amount received<br/>
-                                        <strong>{change}</strong> - Change amount (amount - total)
-                                    </p>
-                                    <p><strong>Example:</strong><br/>
+</div>
+</page>
+
+<page string="Items &amp; Total" name="items_total">
+<group>
+<field name="show_items"/>
+<field name="item_line_template" invisible="not show_items" placeholder="Available variables: {product_name}, {qty}, {price}"/>
+<field name="show_total"/>
+<field name="total_template" widget="text" invisible="not show_total" placeholder="Available variables: {total}, {payment_method}, {amount}, {change}"/>
+</group>
+<div invisible="not show_items" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+<h5 style="color: #495057; margin-top: 0;">Available Variables for Item Lines:</h5>
+<p>
+<strong>{product_name}</strong> - Product name<br/>
+<strong>{qty}</strong> - Quantity purchased<br/>
+<strong>{price}</strong> - Line total price
+</p>
+<p>
+<strong>Example:</strong> {qty}x {product_name} {price}</p>
+<p>
+<em>Note: This template is repeated for each item in the order</em>
+</p>
+</div>
+<div invisible="not show_total" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+<h5 style="color: #495057; margin-top: 0;">Available Variables for Total:</h5>
+<p>
+<strong>{total}</strong> - Order total amount<br/>
+<strong>{payment_method}</strong> - Payment method used<br/>
+<strong>{amount}</strong> - Payment amount received<br/>
+<strong>{change}</strong> - Change amount (amount - total)
+</p>
+<p>
+<strong>Example:</strong>
+<br/>
                                     Total: {total}<br/>
                                     Payment: {payment_method} {amount}<br/>
                                     Change: {change}</p>
-                                </div>
-                            </page>
-                            
-                            <page string="Tax &amp; Customer" name="tax_customer">
-                                <group>
-                                    <field name="show_tax"/>
-                                    <field name="tax_template" 
-                                           widget="text" 
-                                           invisible="not show_tax"
-                                           placeholder="Available variables: {tax_amount}, {tax_base}, {total}"/>
-                                    <field name="show_customer"/>
-                                    <field name="customer_template" 
-                                           invisible="not show_customer"
-                                           placeholder="Available variables: {customer_name}"/>
-                                </group>
-                                <div invisible="not show_tax" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Tax Information:</h5>
-                                    <p>
-                                        <strong>{tax_amount}</strong> - Total tax amount<br/>
-                                        <strong>{tax_base}</strong> - Tax base amount (subtotal)<br/>
-                                        <strong>{total}</strong> - Total including tax
-                                    </p>
-                                    <p><strong>Example:</strong><br/>
+</div>
+</page>
+
+<page string="Tax &amp; Customer" name="tax_customer">
+<group>
+<field name="show_tax"/>
+<field name="tax_template" widget="text" invisible="not show_tax" placeholder="Available variables: {tax_amount}, {tax_base}, {total}"/>
+<field name="show_customer"/>
+<field name="customer_template" invisible="not show_customer" placeholder="Available variables: {customer_name}"/>
+</group>
+<div invisible="not show_tax" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+<h5 style="color: #495057; margin-top: 0;">Available Variables for Tax Information:</h5>
+<p>
+<strong>{tax_amount}</strong> - Total tax amount<br/>
+<strong>{tax_base}</strong> - Tax base amount (subtotal)<br/>
+<strong>{total}</strong> - Total including tax
+</p>
+<p>
+<strong>Example:</strong>
+<br/>
                                     Subtotal: {tax_base}<br/>
                                     Tax: {tax_amount}<br/>
                                     Total: {total}</p>
-                                </div>
-                                <div invisible="not show_customer" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Customer:</h5>
-                                    <p>
-                                        <strong>{customer_name}</strong> - Customer name (if order has customer)
-                                    </p>
-                                    <p><strong>Example:</strong> Customer: {customer_name}</p>
-                                    <p><em>Note: Only shown if order has a customer assigned</em></p>
-                                </div>
-                            </page>
-                            
-                            <page string="Footer" name="footer">
-                                <group>
-                                    <field name="show_footer"/>
-                                    <field name="footer_template" 
-                                           widget="text" 
-                                           invisible="not show_footer"
-                                           placeholder="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}, {ticket_code_line}"/>
-                                </group>
-                                <div invisible="not show_footer" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #495057; margin-top: 0;">Available Variables for Footer:</h5>
-                                    <p>
-                                        <strong>{website_line}</strong> - Company website (if set)<br/>
-                                        <strong>{unique_code}</strong> - Unique order identifier<br/>
-                                        <strong>{order_name}</strong> - Order reference number<br/>
-                                        <strong>{order_datetime}</strong> - Full order date and time<br/>
-                                        <strong>{ticket_code_line}</strong> - POS ticket code (if enabled in POS configuration)
-                                    </p>
-                                    <p><strong>Example:</strong><br/>
+</div>
+<div invisible="not show_customer" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+<h5 style="color: #495057; margin-top: 0;">Available Variables for Customer:</h5>
+<p>
+<strong>{customer_name}</strong> - Customer name (if order has customer)
+</p>
+<p>
+<strong>Example:</strong> Customer: {customer_name}</p>
+<p>
+<em>Note: Only shown if order has a customer assigned</em>
+</p>
+</div>
+</page>
+
+<page string="Footer" name="footer">
+<group>
+<field name="show_footer"/>
+<field name="footer_template" widget="text" invisible="not show_footer" placeholder="Available variables: {website_line}, {unique_code}, {order_name}, {order_datetime}"/>
+</group>
+<div invisible="not show_footer" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0;">
+<h5 style="color: #495057; margin-top: 0;">Available Variables for Footer:</h5>
+<p>
+<strong>{website_line}</strong> - Company website (if set)<br/>
+<strong>{unique_code}</strong> - Unique order identifier<br/>
+<strong>{order_name}</strong> - Order reference number<br/>
+<strong>{order_datetime}</strong> - Full order date and time<br/>
+</p>
+<p>
+<strong>Example:</strong>
+<br/>
                                     Thank you for your purchase!<br/>
                                     {website_line}<br/>
-                                    {ticket_code_line}<br/>
                                     Ref: {unique_code}</p>
-                                </div>
-                            </page>
-                            
-                            <page string="Preview" name="preview">
-                                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;">
-                                    <h5 style="color: #856404; margin-top: 0;">Template Preview</h5>
-                                    <p>This preview shows how your SMS receipt will look with sample data. 
+</div>
+</page>
+
+<page string="Preview" name="preview">
+<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;">
+<h5 style="color: #856404; margin-top: 0;">Template Preview</h5>
+<p>This preview shows how your SMS receipt will look with sample data. 
                                     The actual SMS will use real order information.</p>
-                                </div>
-                                <group>
-                                    <field name="preview_text" 
-                                           widget="text" 
-                                           readonly="1"
-                                           string="SMS Preview"
-                                           nolabel="1"/>
-                                </group>
-                            </page>
-                        </notebook>
-                    </sheet>
-                </form>
-            </field>
-        </record>
-        
-        <!-- SMS Receipt Template Search View -->
-        <record id="view_sms_receipt_template_search" model="ir.ui.view">
-            <field name="name">sms.receipt.template.search</field>
-            <field name="model">sms.receipt.template</field>
-            <field name="arch" type="xml">
-                <search string="SMS Receipt Templates">
-                    <field name="name"/>
-                    <field name="company_id"/>
-                    <separator/>
-                    <filter string="Active" name="active" domain="[('active', '=', True)]" context="{'active_test': True}"/>
-                    <filter string="Inactive" name="inactive" domain="[('active', '=', False)]" context="{'active_test': False}"/>
-                    <filter string="All" name="all" domain="[]" context="{'active_test': False}"/>
-                    <separator/>
-                    <group expand="0" string="Group By">
-                        <filter string="Company" name="group_company" domain="[]" context="{'group_by': 'company_id'}"/>
-                        <filter string="Status" name="group_active" domain="[]" context="{'group_by': 'active'}"/>
-                    </group>
-                </search>
-            </field>
-        </record>
-        
-        <!-- SMS Receipt Template Tree View -->
-        <record id="view_sms_receipt_template_tree" model="ir.ui.view">
-            <field name="name">sms.receipt.template.tree</field>
-            <field name="model">sms.receipt.template</field>
-            <field name="arch" type="xml">
-                <tree string="SMS Receipt Templates" decoration-muted="not active">
-                    <field name="name"/>
-                    <field name="company_id"/>
-                    <field name="active"/>
-                </tree>
-            </field>
-        </record>
-        
-        <!-- SMS Receipt Template Action -->
-        <record id="action_sms_receipt_template" model="ir.actions.act_window">
-            <field name="name">SMS Receipt Templates</field>
-            <field name="res_model">sms.receipt.template</field>
-            <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="view_sms_receipt_template_search"/>
-            <field name="context">{'search_default_all': 1, 'active_test': False}</field>
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+</div>
+<group>
+<field name="preview_text" widget="text" readonly="1" string="SMS Preview" nolabel="1"/>
+</group>
+</page>
+</notebook>
+</sheet>
+</form>
+</field>
+</record>
+
+<!-- SMS Receipt Template Search View -->
+<record id="view_sms_receipt_template_search" model="ir.ui.view">
+<field name="name">sms.receipt.template.search</field>
+<field name="model">sms.receipt.template</field>
+<field name="arch" type="xml">
+<search string="SMS Receipt Templates">
+<field name="name"/>
+<field name="language"/>
+<field name="company_id"/>
+<separator/>
+<filter string="Active" name="active" domain="[('active', '=', True)]" context="{'active_test': True}"/>
+<filter string="Inactive" name="inactive" domain="[('active', '=', False)]" context="{'active_test': False}"/>
+<filter string="All" name="all" domain="[]" context="{'active_test': False}"/>
+<separator/>
+<filter string="Danish" name="danish" domain="[('language', '=', 'da_DK')]"/>
+<filter string="English" name="english" domain="[('language', '=', 'en_US')]"/>
+<filter string="German" name="german" domain="[('language', '=', 'de_DE')]"/>
+<separator/>
+<group expand="0" string="Group By">
+<filter string="Language" name="group_language" domain="[]" context="{'group_by': 'language'}"/>
+<filter string="Company" name="group_company" domain="[]" context="{'group_by': 'company_id'}"/>
+<filter string="Status" name="group_active" domain="[]" context="{'group_by': 'active'}"/>
+</group>
+</search>
+</field>
+</record>
+
+<!-- SMS Receipt Template Tree View -->
+<record id="view_sms_receipt_template_tree" model="ir.ui.view">
+<field name="name">sms.receipt.template.tree</field>
+<field name="model">sms.receipt.template</field>
+<field name="arch" type="xml">
+<tree string="SMS Receipt Templates" decoration-muted="not active">
+<field name="name"/>
+<field name="language"/>
+<field name="company_id"/>
+<field name="active"/>
+</tree>
+</field>
+</record>
+
+<!-- SMS Receipt Template Action -->
+<record id="action_sms_receipt_template" model="ir.actions.act_window">
+<field name="name">SMS Receipt Templates</field>
+<field name="res_model">sms.receipt.template</field>
+<field name="view_mode">tree,form</field>
+<field name="search_view_id" ref="view_sms_receipt_template_search"/>
+<field name="context">{'search_default_all': 1, 'active_test': False}</field>
+<field name="help" type="html">
+<p class="o_view_nocontent_smiling_face">
                     Create your first SMS receipt template!
-                </p>
-                <p>
-                    <strong>SMS receipt templates</strong> allow you to customize how your POS receipts 
+</p>
+<p>
+<strong>SMS receipt templates</strong> allow you to customize how your POS receipts 
                     appear when sent via SMS to customers.
-                </p>
-                <h4>Key Features:</h4>
-                <ul>
-                    <li><strong>Dynamic Variables:</strong> Use {variable_name} to insert order data</li>
-                    <li><strong>Flexible Sections:</strong> Enable/disable company info, items, totals, tax, etc.</li>
-                    <li><strong>Live Preview:</strong> See exactly how your SMS will look</li>
-                    <li><strong>Multi-Company:</strong> Different templates per company</li>
-                </ul>
-                <h4>Available Variables Include:</h4>
-                <p><code>{company_name}, {order_name}, {total}, {customer_name}, {product_name}, {qty}, {price}</code> and many more!</p>
-                <h4>💡 Tip:</h4>
-                <p>Use the filters above to show <strong>Active</strong>, <strong>Inactive</strong>, or <strong>All</strong> templates. Inactive templates appear grayed out.</p>
-            </field>
-        </record>
-        
-        <!-- SMS Receipt Templates Menu Item - Under Point of Sale -->
-        <menuitem id="menu_sms_receipt_template_pos"
-                  name="SMS Receipt Templates"
-                  parent="point_of_sale.menu_point_root"
-                  action="action_sms_receipt_template"
-                  sequence="60"
-                  groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
-    </data>
+</p>
+<h4>Key Features:</h4>
+<ul>
+<li>
+<strong>Dynamic Variables:</strong> Use {variable_name} to insert order data</li>
+<li>
+<strong>Flexible Sections:</strong> Enable/disable company info, items, totals, tax, etc.</li>
+<li>
+<strong>Live Preview:</strong> See exactly how your SMS will look</li>
+<li>
+<strong>Multi-Company:</strong> Different templates per company</li>
+</ul>
+<h4>Available Variables Include:</h4>
+<p>
+<code>{company_name}, {order_name}, {total}, {customer_name}, {product_name}, {qty}, {price}</code> and many more!</p>
+<h4>💡 Tip:</h4>
+<p>Use the filters above to show <strong>Active</strong>,<strong>Inactive</strong>, or <strong>All</strong> templates. Inactive templates appear grayed out.</p>
+</field>
+</record>
+
+<!-- SMS Receipt Templates Menu Item - Under Point of Sale -->
+<menuitem id="menu_sms_receipt_template_pos" name="SMS Receipt Templates" parent="point_of_sale.menu_point_root" action="action_sms_receipt_template" sequence="60" groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
+</data>
 </odoo>
