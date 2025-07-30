@@ -80,56 +80,10 @@ class PosOrder(models.Model):
             self.write({'phone_for_sms_receipt': phone_number})
 
         try:
-            # Create SMS receipt with proper Danish format
-            lines_text = ""
-            for line in self.lines:
-                lines_text += f"- {line.product_id.name} x{line.qty:.0f} = {line.price_subtotal_incl:.2f} kr\n"
+            # Use template-based SMS receipt generation
+            body = self._render_custom_sms_receipt()
             
-            # Build the receipt
-            body = f"""{self.company_id.name}"""
-            
-            if self.company_id.phone:
-                body += f"\nTelefon: {self.company_id.phone}"
-            if self.company_id.vat:
-                body += f"\nCVR: {self.company_id.vat}"
-            if self.company_id.email:
-                body += f"\n{self.company_id.email}"
-            if self.company_id.website:
-                body += f"\n{self.company_id.website}"
-                
-            body += f"\n--------------------------------"
-            
-            if self.partner_id and self.partner_id.name:
-                body += f"\nBetjent af {self.partner_id.name}"
-                
-            body += f"\n{self.name}\n\n{lines_text}"
-            body += f"--------\nTOTAL                kr {self.amount_total:.2f}\n"
-            
-            if self.payment_ids:
-                payment_method = self.payment_ids[0].payment_method_id.name
-                body += f"\n{payment_method}          {self.amount_total:.2f}"
-            else:
-                body += f"\nKontant          {self.amount_total:.2f}"
-                
-            body += f"\n\nBYTTEPENGE\n                     kr 0,00"
-            
-            if self.amount_tax > 0:
-                tax_base = self.amount_total - self.amount_tax
-                body += f"\n\nMoms    Beløb    Basis      I alt"
-                body += f"\n25%     {self.amount_tax:.2f}    {tax_base:.2f}    {self.amount_total:.2f}"
-            
-            if self.partner_id and self.partner_id.name:
-                body += f"\n\nKunde               {self.partner_id.name}"
-                
-            if self.company_id.website:
-                body += f"\n\nBesøg {self.company_id.website} for mere information"
-                
-            body += f"\nUnik kode: {self.pos_reference or self.name}"
-            body += f"\n\nPowered by Odoo"
-            body += f"\nOrdre {self.name}"
-            body += f"\n{self.date_order.strftime('%d-%m-%Y %H:%M:%S')}"
-            
-            _logger.info("Created Danish SMS receipt body")
+            _logger.info("Created SMS receipt body using template system")
 
             # Send SMS using configured gateway
             self._send_sms_message(cleaned_phone, body)
@@ -458,7 +412,13 @@ class PosOrder(models.Model):
         if template.show_footer and template.footer_template:
             website_line = ""
             if self.company_id.website:
-                website_line = f"Besøg {self.company_id.website} for mere information"
+                # Use language-appropriate text for website reference
+                if user_lang.startswith('da'):
+                    website_line = f"Besøg {self.company_id.website} for mere information"
+                elif user_lang.startswith('de'):
+                    website_line = f"Besuchen Sie {self.company_id.website} für weitere Informationen"
+                else:  # Default to English
+                    website_line = f"Visit {self.company_id.website} for more information"
             
             footer_section = template.footer_template.format(
                 website_line=website_line,
