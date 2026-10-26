@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'POS SMS Receipt',
-    'version': '17.0.1.0.0',
+    'version': '18.0.1.0.0',
     'category': 'Point of Sale',
     "license": "AGPL-3",
     'summary': 'Send POS receipts via SMS with customizable templates.',
