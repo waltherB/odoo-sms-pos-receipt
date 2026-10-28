@@ -6,11 +6,11 @@
         <record id="action_sms_template_pos_receipt" model="ir.actions.act_window">
             <field name="name">POS SMS Receipt Templates (Legacy)</field>
             <field name="res_model">sms.template</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
             <field name="domain">[('model_id.model', '=', 'pos.order')]</field>
             <field name="context">{'default_model': 'pos.order'}</field>
         </record>
-        
+
         <!-- Menu item removed - now using custom SMS Receipt Template -->
     </data>
 </odoo>
