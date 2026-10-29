@@ -4,20 +4,13 @@
         <record id="sms_template_pos_receipt" model="sms.template">
             <field name="name">POS Receipt SMS</field>
             <field name="model_id" ref="point_of_sale.model_pos_order"/>
-            <field name="body">Receipt for Order: ${object.name}
-Date: ${object.date_order.strftime('%d-%m-%Y %H:%M')}
-Company: ${object.company_id.name}
-% if object.partner_id.name:
-Customer: ${object.partner_id.name}
-% endif
-
+            <field name="body">Receipt for Order: {{ object.name }}
+Date: {{ object.date_order.strftime('%d-%m-%Y %H:%M') }}
+Company: {{ object.company_id.name }}
+{{ 'Customer: %s' % object.partner_id.name if object.partner_id.name else '' }}
 Items:
-% for line in object.lines:
-- ${line.product_id.name} x${line.qty} = ${line.price_subtotal_incl} kr
-% endfor
-
-Total: ${object.amount_total} kr
-
+{{ '\n'.join('- %s x%s = %s kr' % (line.product_id.name, line.qty, line.price_subtotal_incl) for line in object.lines) }}
+Total: {{ object.amount_total }} kr
 Thank you for your purchase!</field>
         </record>
     </data>
